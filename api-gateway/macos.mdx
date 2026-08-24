@@ -1,0 +1,390 @@
+---
+title: "API Gateway: macOS Setup"
+---
+
+
+Morpheus Skill Installation Guide (MacOS)
+
+
+## Prerequisites
+
+
+Before beginning the installation process, ensure your computer meets the following requirements:
+
+
+### Operating System
+
+
+MacOS M-Series
+
+
+### Hardware
+
+
+Minimum 8 GB RAM (16 GB recommended)
+
+At least 20 GB of available storage
+
+
+### Network Connectivity
+
+
+Internet access for downloading dependencies, software packages, and AI model configurations
+
+
+### Accounts and Credentials
+
+
+A Morpheus account
+
+A Morpheus Inference API Key (obtained during this guide)
+
+
+### Software Dependencies
+
+
+The following software will be installed during the guide if not already present:
+
+Node.js
+
+Git
+
+
+### Security Considerations
+
+
+Before installing and running OpenClaw, EverClaw, or Morpheus-related tools, review the following.
+
+
+### API Key Protection
+
+
+Your Morpheus API key grants access to inference services associated with your account. Never share it publicly, do not post screenshots containing it, do not upload configuration files containing it to GitHub or other public repositories, and regenerate it immediately if exposed.
+
+
+### AI Models May Execute Commands
+
+
+Some OpenClaw skills and integrations may be capable of interacting with the operating system. Review commands before approving execution, avoid granting unnecessary permissions, and keep sensitive personal, financial, or organizational data outside the AI workspace whenever possible.
+
+
+### Credential Hygiene in Troubleshooting
+
+
+If sharing logs, screenshots, or configuration files while troubleshooting (including with colleagues), redact API keys and gateway authentication tokens first. A token exposed during troubleshooting should be treated as compromised and rotated.
+
+
+## Installation
+
+
+
+## Step 1 – Verify Node.js Installation
+
+
+Open Terminal and run:
+
+```bash
+node --version
+```
+
+If Node.js is installed and up to date, proceed to Step 2.
+
+Need to install Node?
+
+Navigate to the official Node.js Website: Node.js — Download Node.js®
+
+Download the MacOS installer
+
+After Installing Node.js and then verify installation using:
+
+```bash
+node --version
+```
+
+
+## Step 2 – Verify Git Installation
+
+
+Open Terminal and run:
+
+```bash
+git --version
+```
+
+If Git is installed, proceed to Step 3.
+
+Need to install Git?
+
+To Install Git, navigate to official Git Website and download the latest version: Git - Install for MacOS
+
+After installation, verify with:
+
+```bash
+git --version
+```
+
+
+## Step 3 – Obtain a Morpheus API Key
+
+
+Navigate to the Morpheus website: Morpheus
+
+
+### Click: Access Inference
+
+
+If you have an already existing account, then Sign In with your associated details.
+
+If not then click on the button to Sign Up at the bottom of the form and fill in the correct details as requested.
+
+After successful registration, you will be redirected to the: Inference API Admin Page
+
+Create a new API key.
+
+
+### Important: Copy and store your API key securely.
+
+
+
+### The key is only displayed once and cannot be viewed again after creation.
+
+
+
+## Step 4 – Install OpenClaw
+
+
+Inside Terminal run:
+
+```bash
+curl -fsSL https://openclaw.ai/install.sh | bash
+```
+
+Wait for the installation to complete.
+
+
+## Step 5 – OpenClaw Onboarding
+
+
+Run:
+
+```bash
+openclaw onboard --install-daemon
+```
+
+The wizard walks you through choosing a model provider, setting an API key, and configuring the Gateway. It takes about 2 minutes.
+
+
+### For the first option select Yes
+
+
+
+### For the Setup mode select QuickStart
+
+
+
+### For the Model/auth provider select Skip for now
+
+
+
+### For the Default model select Keep current model
+
+
+When asked to Select channel select Skip for now as well
+
+
+### For the Search Provider also select Skip for now
+
+
+Select No when asked whether to configure skills
+
+When asked to Enable Hooks, enable all of them like shown
+
+
+### When asked how you want to Hatch your agent, select Hatch later
+
+
+
+## Step 6 – Install EverClaw (Morpheus Skill)
+
+
+Inside Terminal, run:
+
+```bash
+curl -fsSL https://get.everclaw.xyz | bash
+```
+
+Or
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/EverClaw/EverClaw/main/packages/core/scripts/install-with-deps.sh | bash
+```
+
+Wait for the installation to complete successfully.
+
+The installer will:
+
+Verify dependencies
+
+Install EverClaw
+
+Configure OpenClaw integration
+
+Provision a temporary bootstrap inference key
+
+Configure local fallback options
+
+
+## Step 7 – Import Your Morpheus API Key
+
+
+Navigate to the EverClaw directory:
+
+macOS: cd ~/.openclaw/workspace/skills/everclaw
+
+Note: the installed directory name has been observed as both “everclaw” and “everclaw-inference” depending on install script/version. If the path above doesn't exist, check: ls ~/.openclaw/workspace/skills/ and use whichever directory is present.
+
+Note: EverClaw's installer (Step 7) may already have provisioned a bundled temporary starter key in `evcl-...` format — this is different from your own Morpheus API key (`sk...` format) from Step 3.
+
+For this step, use your `sk-...` key, not the bundled `evcl-...` one — the bundled key is a fallback, not a replacement for your own account key.
+
+Run:
+
+```bash
+npm run bootstrap -- --key sk-XXXXXXXXXXXXXXXX
+```
+
+(Replace sk-XXXXXXXXXXXXXXXX with your own Morpheus API key from Step 3.)
+
+⚠️ Known issue: newly created accounts may not have sufficient credits to complete bootstrap. If Step 8 fails with an "insufficient credits" error, this is a known platform limitation, not a setup mistake — see the troubleshooting note after Step 8 for the current workaround.
+
+If successful, EverClaw should display:
+
+
+### Morpheus API Gateway configured!
+
+
+
+## Step 8 – Edit OpenClaw Configuration
+
+
+Open the configuration file:
+
+```bash
+nano ~/.openclaw/openclaw.json
+```
+
+Locate and remove the following section:
+
+```json
+"plugins": {
+  "bonjour": {
+    "enabled": false
+  }
+}
+```
+
+Save the file:
+
+```bash
+Ctrl + X
+Y
+Enter
+```
+
+
+## Step 9 – Restart the Gateway
+
+
+Restart OpenClaw:
+
+```bash
+openclaw gateway restart
+```
+
+
+### Reference Screenshot from macOS:
+
+
+If Restart Fails:
+
+```bash
+openclaw gateway stop
+```
+
+
+### Reference Screenshot from macOS:
+
+
+And then:
+
+```bash
+openclaw gateway start
+```
+
+
+### Reference Screenshot from macOS:
+
+
+
+## Step 10 – Launch OpenClaw Chat
+
+
+
+### Run:
+
+
+```bash
+openclaw chat
+```
+
+You should now be able to use Morpheus models through EverClaw.
+
+
+## Troubleshooting
+
+
+
+### Insufficient credits during Step 8
+
+
+Known issue with newly created accounts.
+
+Workaround:
+
+skip `npm run bootstrap` entirely.
+
+Instead, manually add your Morpheus API key directly into `~/.openclaw/openclaw.json`,
+
+Then continue to Step 9.
+
+
+### Model too expensive for the hosted API gateway
+
+
+The hosted gateway currently supports only a subset of models, and capacity is actively
+
+expanding — this can occur even with a funded key.
+
+Workaround:
+
+This requires two changes in ~/.openclaw/openclaw.json: (1) add the model as a new entry under models.providers.mor-gateway.models (it may not be declared there by default), and (2) set "primary" to the provider-qualified name, e.g. "mor-gateway/deepseek-v4-flash" -- not the bare model name, which gets misinterpreted as a different provider and can trigger a fallback to a local model.
+
+Then restart the gateway (Step 10).
+
+After changing the model, also start a clean session: /new mor-gateway/`<model-name>` (e.g. /new mor-gateway/deepseek-v4-flash). Restarting the gateway does not clear an already-open session's model selection -- an existing session can keep using its previous fallback model even after the config is corrected.
+
+
+### EverClaw shows “needs setup” / “visible to model: no” even after being enabled
+
+
+Some installed versions of EverClaw's SKILL.md declare optional environment variables as objects, but the running OpenClaw version may expect requires.env as a plain string array. This mismatch can show as: environment: ✗ [object object], ✗ [object object]. Fix: open the skill's SKILL.md (in the everclaw/ or everclaw-inference/ directory, see the note above), back it up, remove the env: block under requires: while keeping bins:, then run: openclaw gateway restart && openclaw skills info everclaw. Expect ready and visible to model: yes when fixed.
+
+
+### Asking the model to use EverClaw doesn't seem to do anything
+
+
+EverClaw is not a /everclaw slash command. It installs a permanent inference connection (used automatically for ordinary chat, no invocation needed) and separately ships a diagnostic/setup skill that only activates for matching natural-language requests, e.g. "use the everclaw skill to perform a read-only diagnosis of my morpheus setup." Verify the skill itself is working with: openclaw skills info everclaw (look for ready and visible to model: yes) rather than relying on the model's own claims.
+
+Both workarounds were confirmed to result in successful authentication and
+
+working inference.

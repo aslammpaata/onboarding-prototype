@@ -1,0 +1,508 @@
+---
+title: "Native Path: Becoming a Morpheus Provider"
+description: "A complete walkthrough for registering compute and earning MOR — from first-time setup through deep operational troubleshooting."
+audience: ["provider", "developer"]
+last_verified: "v7.3.0 CLI/API path verified; WSL2 topology field-validated by a second operator; myprovider.mor.org and two flagged values unverified — see notes inline"
+---
+
+# Native Path: Becoming a Morpheus Provider
+
+This guide walks through registering as a compute provider on Morpheus — staking MOR,
+listing a model, and serving real inference requests to earn fees. It combines a
+step-by-step walkthrough for first-time setup with a deep troubleshooting reference
+drawn from two independent real-world deployments (native Linux and Windows+WSL2).
+
+**What you'll do:** Fund a wallet → get the router → choose your topology → stand up a
+model server → configure securely → register on-chain → open your firewall → start
+serving → verify → (if something breaks) diagnose it layer by layer.
+
+**Time:** 30–90 minutes depending on topology and model download size.
+
+---
+
+## Before You Start
+
+**What a provider is, in one sentence:** someone who runs a computer with a GPU,
+connects it to the Morpheus network, and gets paid in MOR whenever a consumer's session
+routes an inference request to it.
+
+**The core debugging philosophy for this whole guide:** a provider setup is a *layered
+system*. Never conclude a higher layer works because a lower one does:
+
+```
+COMPUTE → BACKEND → REAL LOCAL INFERENCE → MORPHEUS PROXY → LOCAL HEALTH →
+DNS → ROUTER/NAT → FIREWALL → (WSL PORTPROXY, if used) → EXTERNAL TCP 3333 →
+MYPROVIDER → PROVIDER REGISTRATION → MODEL REGISTRATION → MODEL/BACKEND MAPPING →
+ACTIVE BID → REAL MORPHEUS SESSION → REAL INFERENCE
+```
+
+Specifically, do **not** assume:
+- vLLM works → therefore Morpheus works.
+- TCP 3333 is open → therefore the provider is registered and can serve paid inference.
+- The model shows `healthy` locally → therefore there's an active marketplace bid.
+
+When something fails, find the **first broken layer** and stop there — don't fix things
+further down the chain first.
+
+**What you'll need:**
+
+| | Minimum | Recommended |
+|---|---|---|
+| GPU | Any CUDA GPU, 4GB+ VRAM | RTX 3060+, 12GB+ VRAM |
+| RAM | 8GB | 16GB+ |
+| Storage | 20GB free | 50GB+ (model weights) |
+| Network | Public IP or port-forwarding | Static public IP |
+| OS | Linux, Windows, macOS | Ubuntu 22.04+ |
+
+Plus: a wallet with a small amount of **Base ETH** (gas) and **MOR** (1–10 for staking),
+and Python 3.10+ if running your own model server.
+
+> 🔐 **Never put your private key in a config file.** This guide leaves
+> `WALLET_PRIVATE_KEY` blank in `.env` and injects it at runtime from your OS's secure
+> credential store instead — see Step 5.
+
+---
+
+## Step 1: Fund a Wallet on Base
+
+1. Install MetaMask (or your preferred EVM wallet), add Base:
+   Network `Base` · RPC `https://mainnet.base.org` · Chain ID `8453` · Currency `ETH` ·
+   Explorer `https://basescan.org`.
+2. Send a small amount of **Base ETH** and **MOR**
+   (`0x7431aDa8a591C955a994a21710752EF9b882b8e3`) to this wallet.
+
+> ⚠️ **Unverified — gas threshold discrepancy.** One field deployment observed a
+> low-balance warning triggering below 0.100 ETH; earlier guidance in this project
+> assumed ~0.01 ETH was sufficient. Fund with at least **0.1 ETH** until this is
+> confirmed against a live node, rather than trusting either number blindly.
+
+**📸 Capture 1 — MetaMask showing nonzero ETH and MOR, on the Base network specifically.**
+
+✅ Wallet funded.
+
+---
+
+## Step 2: Get the Router
+
+**Option A — prebuilt binary (recommended for most people):**
+```bash
+# From https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases
+unzip linux-x86_64-morpheus-router-*.zip -d ~/morpheus/
+chmod +x ~/morpheus/proxy-router
+```
+
+**Option B — build and run from source** (validated in a real WSL2 deployment):
+```bash
+git clone https://github.com/MorpheusAIs/Morpheus-Lumerin-Node.git
+cd Morpheus-Lumerin-Node/proxy-router
+go run ./cmd/main.go
+```
+Useful for development or when you want to track a specific commit rather than a
+tagged release. For long-running production use, prefer a compiled binary + a service
+manager (systemd) over `go run` in an interactive terminal — see Step 8.
+
+**Option C — Desktop App (Windows/macOS)**, for a GUI: download
+`win-x64-morpheus-app-<version>.exe` from the same releases page.
+
+> ⚠️ Release filenames change between versions — check the
+> [releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
+> rather than trusting an old link.
+
+**📸 Capture 2 — successful extract/clone + build, no errors.**
+
+✅ You have a router, one way or another.
+
+---
+
+## Step 3: Choose Your Topology
+
+Two field-validated topologies, plus the GUI option from Step 2:
+
+**Native Linux** — simplest, one less networking hop:
+```
+Internet → Router/NAT → Linux host TCP 3333 → Morpheus proxy-router → model backend
+```
+
+**Windows + WSL2** — fully validated end-to-end, but adds a networking boundary:
+```
+Internet → Router/NAT → Windows host TCP 3333 → Windows portproxy →
+WSL2 TCP 3333 → Morpheus proxy-router → model backend
+```
+If you're on WSL2, you'll need to forward Windows' port 3333 into WSL2 — covered in
+Step 7. **The WSL2 internal IP is not permanent** — it can change after a WSL restart,
+Windows reboot, or networking change, meaning the portproxy rule needs refreshing each
+time. Keep this in mind; it's the single most common WSL2-specific gotcha.
+
+✅ Pick one and continue — the remaining steps apply to both, with WSL2-specific notes
+called out where they differ.
+
+---
+
+## Step 4: Set Up a Model Server
+
+The router forwards inference requests to a backend you run yourself, exposing an
+**OpenAI-compatible API**.
+
+**Easiest — Ollama:**
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull qwen2.5:7b
+ollama serve   # port 11434
+```
+
+**For GPU throughput — vLLM:**
+```bash
+python3 -m venv ~/vllm-env
+source ~/vllm-env/bin/activate
+python -m pip install --upgrade pip vllm
+
+python -m vllm.entrypoints.openai.api_server \
+    --model Qwen/Qwen2.5-7B-Instruct-AWQ --served-model-name Qwen2.5-7B-Instruct-AWQ \
+    --gpu-memory-utilization 0.85 --max-model-len 4096 --port 8000 --host 0.0.0.0
+```
+
+> ⚠️ **Common trap: mixed Python environments.** If vLLM is installed inside a venv
+> (e.g. `~/vllm-env`), you must `source ~/vllm-env/bin/activate` and then use `python`
+> — **not** `python3` (which may resolve to system Python, producing
+> `ModuleNotFoundError: No module named 'vllm'`) and **not** `py` (not a real command on
+> Linux/WSL). Confirm with `which python` — it should point *inside* your venv, not
+> `/usr/bin/python3`.
+
+**📸 Capture 3 — a direct test against your model server, before connecting the router:**
+```bash
+curl -s http://localhost:8000/v1/models | python3 -m json.tool
+```
+Then a **real completion**, not just the models list:
+```bash
+curl -s http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"<SERVING_NAME>","messages":[{"role":"user","content":"Reply with exactly: PROVIDER ONLINE"}],"max_tokens":20}' \
+  | python3 -m json.tool
+```
+Annotate: *"Confirm a real completion works here — `/v1/models` alone isn't proof.
+If this fails, don't troubleshoot Morpheus yet."*
+
+✅ Your model server answers on its own.
+
+---
+
+## Step 5: Configure the Router Securely
+
+Create `~/morpheus/.env`, **leaving the private key field blank**:
+```bash
+cat > ~/morpheus/.env << 'EOF'
+ETH_NODE_ADDRESS=https://base-mainnet.public.blastapi.io
+ETH_NODE_CHAIN_ID=8453
+DIAMOND_CONTRACT_ADDRESS=0x6aBE1d282f72B474E54527D93b979A4f64d3030a
+MOR_TOKEN_ADDRESS=0x7431aDa8a591C955a994a21710752EF9b882b8e3
+WALLET_PRIVATE_KEY=
+PROXY_ADDRESS=0.0.0.0:3333
+PROXY_STORAGE_PATH=./data/badger/
+MODELS_CONFIG_PATH=./models-config.json
+WEB_ADDRESS=0.0.0.0:8082
+AUTH_CONFIG_FILE_PATH=./proxy.conf
+COOKIE_FILE_PATH=./.cookie
+ENVIRONMENT=production
+EOF
+```
+
+Point `models-config.json` at your model server:
+```json
+{
+  "models": [
+    { "modelId": "0xYOUR_MODEL_ID", "modelName": "Qwen2.5-7B-Instruct-AWQ",
+      "apiType": "openai", "apiUrl": "http://127.0.0.1:8000" }
+  ]
+}
+```
+
+**Store your private key in the OS keychain, once:**
+
+*Linux:*
+```bash
+secret-tool store --service=morpheus-wallet-key --account=provider <<< "YOUR_PRIVATE_KEY"
+```
+*macOS:*
+```bash
+security add-generic-password -a "$(whoami)" -s "morpheus-wallet-key" -w "YOUR_PRIVATE_KEY"
+```
+
+> ⚠️ **If you see `failed to unlock correct collection` or `Using env wallet. Private
+> key persistence unavailable`** in the router log, your keychain integration isn't
+> available (common on headless/WSL2 setups without a desktop keyring running) — the
+> router falls back to reading `WALLET_PRIVATE_KEY` from the environment each start.
+> This still works, it's just less convenient — you'll need to `export
+> WALLET_PRIVATE_KEY=...` before every start rather than it persisting automatically.
+
+**📸 Capture 4 — the `.env` file's contents, with the blank `WALLET_PRIVATE_KEY=` line.**
+
+✅ Router configured, no plaintext key on disk.
+
+---
+
+## Step 6: Register On-Chain
+
+**This is the step people most often miss.** A running, reachable node with no on-chain
+registration is invisible to the network — see the case study below.
+
+**Path A — CLI/API (verified, recommended):**
+```bash
+curl -s -u "$(cat ~/morpheus/.cookie)" -X POST \
+  "http://localhost:8082/blockchain/approve?spender=0x6aBE1d282f72B474E54527D93b979A4f64d3030a&amount=1000000000000000000000"
+
+curl -s -u "$(cat ~/morpheus/.cookie)" -X POST \
+  "http://localhost:8082/blockchain/createBlockchainProvider" \
+  -H "Content-Type: application/json" \
+  -d '{"endpoint": "http://YOUR_PUBLIC_ENDPOINT:3333", "stakeAmount": "10000000000000000000"}'
+
+curl -s -u "$(cat ~/morpheus/.cookie)" -X POST \
+  "http://localhost:8082/blockchain/createBlockchainProviderBid" \
+  -H "Content-Type: application/json" \
+  -d '{"modelId": "0xYOUR_MODEL_ID", "endpoint": "http://YOUR_PUBLIC_ENDPOINT:3333", "pricePerSecond": "1000000000000"}'
+```
+> Amounts are in wei. Endpoint names may shift between versions — check
+> `http://localhost:8082/swagger/index.html` for your version's exact API surface.
+> Do not copy historical stake amounts or prices as current requirements.
+
+**Path B — web portal** (`myprovider.mor.org`) — **unverified in this project.** If you
+use it: connect wallet, enter endpoint, register model, stake, confirm in MetaMask.
+
+> ⚠️ **If MyProvider generates a complete model-configuration line or block after
+> registration, copy it exactly** — don't reconstruct it manually, don't copy only the
+> model ID, don't substitute a guessed value. The UI's generated output is authoritative
+> for the fields it produces; a manually reconstructed line can silently omit something.
+
+**Path C — direct contract call (advanced)**, via
+[Basescan's Write tab](https://basescan.org/address/0x6aBE1d282f72B474E54527D93b979A4f64d3030a#writeContract):
+`ModelFacet`/`SessionFacet`/`AllowanceFacet` directly.
+
+> 🔒 **Provider stake is not the same as consumer session stake.** Consumer sessions are
+> currently subject to a ~24h hold before the stake is claimable, requiring a manual
+> `withdrawUserStakes` call (see the [Desktop App](/native-path/desktop-app) and
+> [morctl](/native-path/morctl) guides). Your **provider registration stake**
+> follows separate rules — don't assume the two behave identically.
+
+**📸 Capture 5 — the on-chain confirmation**, Basescan transaction or CLI JSON response.
+
+✅ You have a real, on-chain model ID.
+
+---
+
+## Step 7: Open Your Firewall
+
+**Native Linux:**
+```bash
+sudo ufw allow 3333/tcp
+```
+
+**Windows + WSL2** — run in an **Administrator PowerShell window directly** (not
+embedded inside a WSL shell — nesting PowerShell inside WSL via complex multi-line
+commands with backticks is known to hang waiting for input):
+```powershell
+$WSL_IP = (wsl.exe hostname -I).Trim().Split(' ')[0]
+Write-Host "WSL IP: $WSL_IP"
+
+netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=3333
+netsh interface portproxy add v4tov4 listenaddress=0.0.0.0 listenport=3333 connectaddress=$WSL_IP connectport=3333
+
+New-NetFirewallRule -DisplayName "Morpheus Proxy 3333" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3333 -ErrorAction SilentlyContinue
+
+netsh interface portproxy show v4tov4
+```
+Keep `8082` and your model server's port **private** — only `3333` should be exposed.
+
+Then forward TCP 3333 on your actual router/NAT to your machine (native Linux or
+Windows, whichever is hosting).
+
+**Test from outside your network:**
+```bash
+nc -zv YOUR_PUBLIC_ENDPOINT 3333 -w 5      # Linux/macOS
+```
+```powershell
+Test-NetConnection YOUR_PUBLIC_ENDPOINT -Port 3333    # Windows
+```
+
+> ⚠️ **Never `curl` or open port 3333 in a browser.** It's a raw Morpheus protocol
+> listener, not HTTP — sending HTTP traffic to it produces
+> `invalid character 'G' looking for beginning of value` (because `GET ...` isn't a
+> valid Morpheus protocol message). Use `nc`/`Test-NetConnection` only.
+
+**📸 Capture 6 — the successful external connection test**, run from a genuinely
+different network.
+
+✅ Reachable from the internet, not just locally.
+
+---
+
+## Step 8: Start the Router and Verify Local Health
+
+```bash
+export WALLET_PRIVATE_KEY=$(secret-tool lookup --service=morpheus-wallet-key --account=provider)  # Linux
+cd ~/morpheus && ./proxy-router
+```
+
+**Run as a persistent service (Linux/systemd)**, surviving reboots:
+```bash
+cat > ~/morpheus/start-provider.sh << 'SCRIPT'
+#!/bin/bash
+export WALLET_PRIVATE_KEY=$(secret-tool lookup --service=morpheus-wallet-key --account=provider)
+cd ~/morpheus && exec ./proxy-router
+SCRIPT
+chmod +x ~/morpheus/start-provider.sh
+
+cat > ~/.config/systemd/user/morpheus-provider.service << 'EOF'
+[Unit]
+Description=Morpheus Provider
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/morpheus/start-provider.sh
+Restart=on-failure
+RestartSec=10
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --user daemon-reload
+systemctl --user enable --now morpheus-provider
+```
+
+**Check health:**
+```bash
+curl -s -u "$(cat ~/morpheus/.cookie)" http://localhost:8082/healthcheck | python3 -m json.tool
+curl -s -u "$(cat ~/morpheus/.cookie)" http://localhost:8082/v1/models | python3 -m json.tool
+```
+
+**Understand the model health states you might see:**
+
+| Status | Meaning |
+|---|---|
+| `healthy` | Proxy reaches the backend and its probe succeeds — a **local/backend** statement only. |
+| `no_bid` | Model is known/healthy locally but has no active marketplace bid — a **marketplace** state, not a model failure. |
+| `local-only` | Model exists in local config but no matching on-chain registration was found — a **registration** issue. |
+| Active bid, no model config | The blockchain has a bid, but the local proxy has no matching backend mapping — a **mapping** problem. |
+
+Don't fix these by blindly restarting everything — identify which layer the state
+actually points to.
+
+**📸 Capture 7 — the router's startup log**, boxing wallet loaded, listening on 3333,
+no config errors.
+
+✅ Running, healthy, and will survive a restart.
+
+---
+
+## Step 9: Test Real Inference
+
+```bash
+curl -s -u "$(cat ~/morpheus/.cookie)" -X POST \
+  "http://localhost:8082/blockchain/models/YOUR_MODEL_ID/session" \
+  -H "Content-Type: application/json" -d '{"sessionDuration": 600}'
+
+curl -s -u "$(cat ~/morpheus/.cookie)" -X POST \
+  "http://localhost:8082/v1/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "session_id: SESSION_ID" -H "model_id: YOUR_MODEL_ID" \
+  -d '{"model": "Qwen2.5-7B-Instruct-AWQ", "messages": [{"role": "user", "content": "Hello!"}], "stream": false}'
+```
+A real reply confirms the full loop — you're earning.
+
+✅ Provider setup complete, end to end.
+
+---
+
+## Real Example: Why a Setup Wasn't Working
+
+The single most common mistake, confirmed independently across two separate
+deployments:
+
+| Step | Status | Issue |
+|---|---|---|
+| Router running | ✅ Online, port 3333 reachable | — |
+| Wallet funded | ⚠️ Below recommended | — |
+| Model server | ✅ Running, real completions succeed | — |
+| **On-chain registration** | ❌ **Not done** | **The actual blocker, both times** |
+| MOR staked | ⚠️ Below threshold | — |
+| Firewall | ✅ Open | — |
+
+**Result:** consumers could TCP-connect, but the network had no on-chain record —
+session creation failed, because the router queries the **blockchain** for model IDs,
+not the provider's local config. A listening proxy and a successful port probe do
+**not** create a provider record, model identity, bid, or valid session.
+**Fix:** complete Step 6 and stake sufficient MOR.
+
+---
+
+## Advanced Troubleshooting
+
+| Symptom | Layer | Fix |
+|---|---|---|
+| `ModuleNotFoundError: No module named 'vllm'` | Backend/Python | Activate the vLLM venv and use `python`, not `python3` or `py`. |
+| BadgerDB directory lock (`Cannot acquire directory lock`) | Proxy process | **Don't delete the database.** Find the real owner: `fuser -v ./data` and `ps -ef \| grep -E "proxy-router\|cmd/main.go"`. Stop that process, verify it's gone, start exactly one instance. |
+| `invalid IPFS multiaddr: localhost:5001` | Proxy config | Independently observed twice in this project (own testing + this field report) — likely a real bug. Disable IPFS if unused, or use a correctly formatted multiaddr. Worth filing/cross-referencing as a GitHub issue if not already tracked. |
+| Low ETH warning | Wallet | See the flagged threshold note in Step 1 — fund generously until confirmed. |
+| `eth_getLogs` ... up to a 10 block range | RPC | An RPC provider query-range limit, not a model problem. Use a compatible RPC endpoint. |
+| `messageEOF` in proxy logs | TCP/protocol | Usually a probe/scan/disconnect — not alarming on its own. Investigate only if it happens during genuine sessions. |
+| `invalid character 'G' looking for beginning of value` | TCP/protocol | You sent HTTP to port 3333 — see Step 7's warning. |
+| Model ID returns 404 | On-chain registration | Not registered (Step 6) — a running node isn't enough. |
+| Session opens, no response | Endpoint/backend | Test each independently (Steps 4, 7). |
+| "No providers found for model" | Under-staked | Increase your stake. |
+| Local TCP works, external fails | Network | Check DDNS → router → firewall → portproxy (WSL2) → CGNAT, in that order. |
+| WSL2: portproxy stopped working after a reboot | WSL networking | The WSL IP changed — re-run the `netsh portproxy` refresh from Step 7. Your public endpoint does **not** need to change; only the internal forwarding target does. |
+
+> ⚠️ **Security note:** one field deployment observed default management-API
+> credentials of `admin`/`admin`. If this is genuinely the shipped default rather than
+> something the operator set, it's a real exposure risk worth confirming and reporting
+> — never use it in production regardless.
+
+---
+
+## Provider Economics
+
+| Price (MOR/sec) | 1-hour session cost | Positioning |
+|---|---|---|
+| 0.0001 | 0.36 MOR | Budget/competitive |
+| 0.001 | 3.6 MOR | Standard |
+| 0.01 | 36 MOR | Premium/large models |
+
+**Costs:** one-time MOR stake (unstakeable later), small ETH gas per transaction,
+ongoing electricity/bandwidth. These are illustrative, not current market guidance —
+confirm current pricing units and requirements before relying on them financially.
+
+---
+
+## Security Best Practices
+
+1. Never store a private key in a config file — OS keychain or runtime env var only.
+2. Use a **dedicated wallet** for providing, not your main one.
+3. Never use default management credentials (see the `admin`/`admin` flag above).
+4. Keep only port `3333` public — `8082` and your model server's port stay private.
+5. Keep the router and dependencies updated; monitor logs.
+6. Understand recovery (BadgerDB, keychain fallback) before deleting node data.
+
+---
+
+## Glossary
+
+- **Provider** — someone serving inference and earning MOR.
+- **Stake** — MOR locked to register a provider/model listing (distinct from a
+  consumer's per-session stake, which follows different, currently more restrictive
+  rules — see Step 6).
+- **Endpoint** — your node's public IP/hostname + port, registered on-chain.
+- **Model server** — the local OpenAI-compatible engine your router forwards to.
+- **Bid** — the marketplace offer joining a model, endpoint, and price.
+- **Session** — the real consumer interaction that must traverse the full protocol
+  path and reach inference.
+
+---
+
+## Useful Links
+
+| Resource | Status |
+|---|---|
+| [Releases](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases) | Verified |
+| [Diamond contract](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a) | Verified |
+| [MOR token](https://basescan.org/token/0x7431ada8a591c955a994a21710752ef9b882b8e3) | Verified |
+| [nodedocs.mor.org providers](https://nodedocs.mor.org/providers/full/quickstart) | Official reference |
+| [myprovider.mor.org](https://myprovider.mor.org) | **Unverified** |

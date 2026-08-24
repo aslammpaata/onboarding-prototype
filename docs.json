@@ -1,0 +1,62 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Morpheus Onboarding (Prototype)",
+  "colors": {
+    "primary": "#16A34A",
+    "light": "#4ADE80",
+    "dark": "#15803D"
+  },
+  "fonts": {
+    "family": "Inter"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Get Started",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["index"]
+          }
+        ]
+      },
+      {
+        "tab": "Native Path",
+        "groups": [
+          {
+            "group": "Consumer",
+            "pages": [
+              "native-path/desktop-app",
+              "native-path/morctl",
+              "native-path/headless-developer"
+            ]
+          },
+          {
+            "group": "Provider",
+            "pages": ["native-path/provider"]
+          }
+        ]
+      },
+      {
+        "tab": "API Gateway",
+        "groups": [
+          {
+            "group": "OpenClaw + EverClaw Setup",
+            "pages": [
+              "api-gateway/windows",
+              "api-gateway/macos",
+              "api-gateway/ubuntu"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [
+      { "label": "Technical Docs (nodedocs)", "href": "https://nodedocs.mor.org" },
+      { "label": "GitHub", "href": "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node" }
+    ]
+  }
+}

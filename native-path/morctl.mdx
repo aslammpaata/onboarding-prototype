@@ -37,114 +37,115 @@ inference" chain with one call.
 
 ---
 
-## Step 1: Get the Binary
+## Security Considerations
 
-```bash
-git clone https://github.com/aslammpaata/morctl.git
-cd morctl
-go build -o morctl .          # Linux/macOS
-# or: go build -o morctl.exe .   # Windows
-```
-Cross-compile: `GOOS=windows GOARCH=amd64 go build -o morctl.exe .` ·
-`GOOS=darwin GOARCH=arm64 go build -o morctl .` (Apple Silicon) ·
-`GOOS=darwin GOARCH=amd64 go build -o morctl .` (Intel)
-
-*No output means it worked.*
-
-✅ You have a binary.
+> 🔐 The `.cookie` file you point `morctl` at (Step 2) is your router's auto-generated
+> auth credential — treat it like a password: don't commit it to Git or share it. See
+> the [headless/developer guide](/native-path/headless-developer) for the fuller
+> private-key handling guidance that applies to the same underlying router.
 
 ---
 
-## Step 2: Point It at Your Router's Credentials
+## Walkthrough
 
-```bash
-export COOKIE_FILE_PATH="/path/to/.cookie"    # macOS/Linux
-$env:COOKIE_FILE_PATH = "C:\path\to\.cookie"   # Windows
-```
+<Steps>
+  <Step title="Get the Binary">
+    ```bash
+    git clone https://github.com/aslammpaata/morctl.git
+    cd morctl
+    go build -o morctl .          # Linux/macOS
+    # or: go build -o morctl.exe .   # Windows
+    ```
+    Cross-compile: `GOOS=windows GOARCH=amd64 go build -o morctl.exe .` ·
+    `GOOS=darwin GOARCH=arm64 go build -o morctl .` (Apple Silicon) ·
+    `GOOS=darwin GOARCH=amd64 go build -o morctl .` (Intel)
 
-✅ Credentials in place.
+    *No output means it worked.*
 
----
+    ✅ You have a binary.
+  </Step>
 
-## Step 3: Preflight Check
+  <Step title="Point It at Your Router's Credentials">
+    ```bash
+    export COOKIE_FILE_PATH="/path/to/.cookie"    # macOS/Linux
+    $env:COOKIE_FILE_PATH = "C:\path\to\.cookie"   # Windows
+    ```
 
-```bash
-./morctl
-```
+    ✅ Credentials in place.
+  </Step>
 
-A successful run shows three key lines: router reachable, wallet balance, and
-"Preflight OK".
+  <Step title="Preflight Check">
+    ```bash
+    ./morctl
+    ```
 
-✅ Ready for Step 4.
+    A successful run shows three key lines: router reachable, wallet balance, and
+    "Preflight OK".
 
----
+    ✅ Ready for Step 4.
+  </Step>
 
-## Step 4: Open a Session and Run Inference
+  <Step title="Open a Session and Run Inference">
+    ```bash
+    ./morctl --dev --prompt "Hello!"
+    ```
 
-```bash
-./morctl --dev --prompt "Hello!"
-```
+    <Frame>
+      <img src="/native-path/images/mor-ctl-01-dev-run-output.png" alt="morctl --dev --prompt output showing session opened, inference ok, the model reply, and the session live countdown" />
+    </Frame>
 
-<Frame>
-  <img src="/native-path/images/mor-ctl-01-dev-run-output.png" alt="morctl --dev --prompt output showing session opened, inference ok, the model reply, and the session live countdown" />
-</Frame>
+    This is the single most important capture in the guide.
 
-This is the single most important capture in the guide.
+    ✅ Core loop works.
+  </Step>
 
-✅ Core loop works.
+  <Step title="Have a Real Conversation">
+    ```bash
+    ./morctl --dev --interactive
+    ```
 
----
+    Type `exit`/`quit` to stop chatting locally — the session keeps running in the
+    background.
 
-## Step 5: Have a Real Conversation
+    ✅ Multi-turn conversation confirmed.
+  </Step>
 
-```bash
-./morctl --dev --interactive
-```
+  <Step title="Session Reuse">
+    Run `--dev` again before expiry:
 
-Type `exit`/`quit` to stop chatting locally — the session keeps running in the
-background.
+    <Frame>
+      <img src="/native-path/images/mor-ctl-02-session-reuse.png" alt="morctl output showing the 'reusing cached session' line on a second --dev run before session expiry" />
+    </Frame>
 
-✅ Multi-turn conversation confirmed.
+    Force fresh: `./morctl --dev --fresh`
 
----
+    > ⚠️ **Known limitation:** session *reuse* correctly avoids a new stake, but
+    > conversation *history* is not currently persisted across separate `morctl` runs —
+    > exiting and restarting resets chat memory even though the underlying session is the
+    > same one. This is being worked on; see the project roadmap.
 
-## Step 6: Session Reuse
+    ✅ You understand when a session opens vs. reuses.
+  </Step>
 
-Run `--dev` again before expiry:
+  <Step title="What Happens When You're Done">
+    ⚠️ **Updated — recently changed, more involved than before.**
 
-<Frame>
-  <img src="/native-path/images/mor-ctl-02-session-reuse.png" alt="morctl output showing the 'reusing cached session' line on a second --dev run before session expiry" />
-</Frame>
+    - Letting a session expire naturally only auto-settles the small session **cost** —
+      not your full stake.
+    - Your stake enters a **~24-hour hold** before it's claimable — a network-wide rule,
+      not specific to `morctl`.
+    - **Recovering it currently requires a manual call** to `withdrawUserStakes` on the
+      Diamond contract — not yet wired into `morctl` itself. Use
+      [Basescan's Write tab](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a#writeContract)
+      with your address and a small iteration count.
+      ([Tracking issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827)
+      — an API for this is proposed but not yet shipped.)
+    - Exiting `--interactive` only stops the local loop — never closes the session early,
+      so no early-close penalty either way.
 
-Force fresh: `./morctl --dev --fresh`
-
-> ⚠️ **Known limitation:** session *reuse* correctly avoids a new stake, but
-> conversation *history* is not currently persisted across separate `morctl` runs —
-> exiting and restarting resets chat memory even though the underlying session is the
-> same one. This is being worked on; see the project roadmap.
-
-✅ You understand when a session opens vs. reuses.
-
----
-
-## Step 7: What Happens When You're Done
-
-⚠️ **Updated — recently changed, more involved than before.**
-
-- Letting a session expire naturally only auto-settles the small session **cost** —
-  not your full stake.
-- Your stake enters a **~24-hour hold** before it's claimable — a network-wide rule,
-  not specific to `morctl`.
-- **Recovering it currently requires a manual call** to `withdrawUserStakes` on the
-  Diamond contract — not yet wired into `morctl` itself. Use
-  [Basescan's Write tab](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a#writeContract)
-  with your address and a small iteration count.
-  ([Tracking issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827)
-  — an API for this is proposed but not yet shipped.)
-- Exiting `--interactive` only stops the local loop — never closes the session early,
-  so no early-close penalty either way.
-
-✅ Full loop understood, including the currently-manual recovery step.
+    ✅ Full loop understood, including the currently-manual recovery step.
+  </Step>
+</Steps>
 
 ---
 

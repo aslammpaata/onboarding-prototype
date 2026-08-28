@@ -2,491 +2,519 @@
 title: "API Gateway: Ubuntu / Oracle VirtualBox Setup"
 ---
 
-
 Morpheus Installation Guide (Oracle VirtualBox-Ubuntu)
 
+## Before You Start
 
-## Prerequisites
+**What this is, in one sentence:** installing OpenClaw (an AI agent CLI) and EverClaw
+(the Morpheus inference skill) inside an Ubuntu VirtualBox VM so your agent can call
+Morpheus-hosted models through the API Gateway — no wallet or local node required.
 
+**What you'll need:**
 
-Before beginning the installation process, ensure that your host computer meets the following requirements:
-
-
-### Hardware Requirements
-
-
-Processor (CPU): A 64-bit processor with virtualization support (Intel VT-x or AMD-V).
-
-Memory (RAM): Minimum 4 GB RAM recommended; 8 GB or more is strongly recommended for a smoother experience when running Ubuntu, OpenClaw, and Morpheus-related services.
-
-Storage: At least 25 GB of available disk space for Ubuntu, OpenClaw, EverClaw, updates, and future workspace files.
-
-
-### Virtualization Requirements
-
-
-Virtualization Technology: Hardware virtualization (Intel VT-x or AMD-V) must be enabled in your computer’s BIOS/UEFI settings.
-
-Oracle VirtualBox: Install the latest version of Oracle VM VirtualBox compatible with your operating system.
-
-
-### Software Requirements
-
-
-Ubuntu Desktop ISO: Download the latest Ubuntu Desktop LTS release from the official Ubuntu website.
-
-Internet Connection: Required for downloading Ubuntu packages, OpenClaw, EverClaw, and communicating with Morpheus inference services.
-
-Morpheus Account: A Morpheus account is required to obtain a free API key for accessing inference services.
-
-
-### Recommended Requirements
-
-
-For the best experience:
-
-8 GB RAM or greater
-
-4 CPU cores allocated to the virtual machine
-
-SSD storage rather than a mechanical hard drive
-
-Stable broadband internet connection
-
+| | Requirement |
+|---|---|
+| Host hardware | 64-bit CPU with virtualization (Intel VT-x/AMD-V) enabled in BIOS/UEFI; 4 GB RAM minimum (8 GB+ strongly recommended); 25 GB free disk space |
+| Virtualization | Latest Oracle VM VirtualBox installed |
+| Software | Ubuntu Desktop LTS ISO (latest release); a Morpheus account for a free API key |
+| Network | Internet connection (Ubuntu packages, OpenClaw, EverClaw, Morpheus inference services) |
+| Recommended | 8 GB+ RAM, 4 VM CPU cores, SSD storage, stable broadband — for the smoothest experience |
 
 ## Security Considerations
 
+OpenClaw and EverClaw provide AI agents with access to local system resources. Before installation, users should understand the following security implications.
 
-Before installing and running OpenClaw, EverClaw, or Morpheus-related tools, users should understand the following security implications.
-
-
-### API Key Protection
-
-
-Your Morpheus API key grants access to inference services associated with your account.
-
-To protect your key:
-
-Never share your API key publicly.
-
-Do not post screenshots containing your API key.
-
-Do not upload configuration files containing API keys to GitHub or other public repositories.
-
-Store API keys in a secure location and replace compromised keys immediately.
-
-
-### AI Models May Execute Commands
-
+### 1. Local File & Command Access
 
 Some OpenClaw skills and integrations may be capable of interacting with the operating system, reading files, or executing commands depending on configuration.
 
 For this reason:
 
-Review commands before approving execution.
+- Review commands before approving execution
+- Avoid granting unnecessary permissions
+- Keep sensitive personal, financial, or organizational data outside the AI workspace whenever possible
 
-Avoid granting unnecessary permissions.
+### 2. API Key Protection
 
-Keep sensitive personal, financial, or organizational data outside the AI workspace whenever possible.
+Your Morpheus API key grants access to inference services associated with your account.
 
+To protect your key:
 
-### Benefits of Using a Virtual Machine
+- Never share your API key publicly
+- Do not post screenshots containing your API key
+- Do not upload configuration files containing API keys to GitHub or other public repositories
 
+Store API keys in a secure location and replace compromised keys immediately.
 
-Running OpenClaw and related tools inside a VirtualBox virtual machine provides an additional layer of separation between AI tooling and your primary operating system.
+### 3. Network Communications
 
-Benefits include:
+Models accessed through Morpheus Gateway communicate with external inference providers over the internet. Users should be aware that:
 
-Isolation from your main Windows environment.
+- Prompts may be transmitted to remote AI services
+- Provider privacy policies may differ
+- Sensitive personal or corporate information should not be submitted without understanding the provider's data handling practices
 
-Reduced risk to personal files and applications.
+### 4. Principle of Least Privilege & Resource Usage
 
-Easier recovery if software becomes misconfigured.
+Whenever possible:
 
-Ability to create snapshots before major changes and revert if issues occur.
+- Use standard user accounts instead of administrator accounts
+- Limit filesystem permissions
+- Install only required skills and integrations
 
+Running AI-related services may also consume significant CPU, memory, storage, and network resources. Monitor resource usage regularly, allocate sufficient resources to the virtual machine, and avoid running multiple resource-intensive applications simultaneously on the host machine.
 
-### Keep Software Updated
+### 5. Benefits of Using a Virtual Machine
 
+Running OpenClaw and related tools inside a VirtualBox virtual machine provides an additional layer of separation between AI tooling and your primary operating system. Benefits include:
 
-Regularly update:
+- Isolation from your main host operating system
+- Reduced risk to personal files and applications
+- Easier recovery if software becomes misconfigured
+- Ability to create snapshots before major changes and revert if issues occur
 
-Ubuntu
+For users who are new to Linux or AI tooling, this contained approach is generally
+safer than installing and configuring these tools directly on the host operating
+system.
 
-Oracle VirtualBox
-
-OpenClaw
-
-EverClaw
-
-Node.js
-
-Updates often contain important security fixes and compatibility improvements.
-
-
-### Use Trusted Sources Only
-
-
-Download software exclusively from official sources:
-
-Ubuntu Official Website
-
-Oracle VirtualBox Official Website
-
-OpenClaw Official Documentation
-
-EverClaw Official Repository
-
-Morpheus Official Platform
-
-Avoid third-party installers or unofficial modified packages.
-
-
-### Resource Usage Considerations
-
-
-Running AI-related services may consume significant CPU, memory, storage, and network resources.
-
-Users should:
-
-Monitor resource usage regularly.
-
-Allocate sufficient resources to the virtual machine.
-
-Avoid running multiple resource-intensive applications simultaneously on the host machine.
-
-
-### Recommended Approach for New Users
-
-
-For users who are new to Linux or AI tooling, using Ubuntu inside Oracle VirtualBox is generally safer than installing and configuring these tools directly on the host operating system because it provides a contained environment that can be backed up, reset, or restored if configuration issues occur
-
+Download software exclusively from official sources (Ubuntu, Oracle VirtualBox,
+OpenClaw, EverClaw, Morpheus) and avoid third-party installers or unofficial
+modified packages. Regularly update Ubuntu, Oracle VirtualBox, OpenClaw, EverClaw,
+and Node.js — updates often contain important security fixes and compatibility
+improvements.
 
 ## Installation
 
+<Steps>
+  <Step title="Install Ubuntu for desktop">
+    Visit the official Ubuntu download page: https://ubuntu.com/download/desktop
 
+    Choose the Ubuntu version you wish to install.
 
-## Step 1 – Install Ubuntu for desktop
+    LTS (Long-Term Support) versions are recommended for stability and longer support.
 
+    Non-LTS versions provide newer features but have shorter support periods.
 
-Visit the official Ubuntu download page: https://ubuntu.com/download/desktop
+    Click Download and save the Ubuntu ISO file to your computer.
+  </Step>
 
-Choose the Ubuntu version you wish to install.
+  <Step title="Install Oracle VirtualBox">
+    Navigate to the official website for Oracle VirtualBox and Install the Windows Installer: Oracle VM VirtualBox - Downloads | Oracle Technology Network | Oracle
 
-LTS (Long-Term Support) versions are recommended for stability and longer support.
+    Run the Installer:  Double-click the downloaded installer file and follow the on-screen instructions to install VirtualBox on your machine.
+  </Step>
 
-Non-LTS versions provide newer features but have shorter support periods.
+  <Step title="Obtain a Morpheus API Key">
+    Navigate to the Morpheus website: Morpheus
 
-Click Download and save the Ubuntu ISO file to your computer.
+    Click: Access Inference
 
+    If you have an already existing account, then Sign In with your associated details.
 
-## Step 2 – Install Oracle VirtualBox
+    If not, then click on the button to Sign Up at the bottom of the form and fill in the correct details as requested.
 
+    After successful registration, you will be redirected to the: Inference API Admin Page
 
-Navigate to the official website for Oracle VirtualBox and Install the Windows Installer: Oracle VM VirtualBox - Downloads | Oracle Technology Network | Oracle
+    Create a new API key.
 
-Run the Installer:  Double-click the downloaded installer file and follow the on-screen instructions to install VirtualBox on your machine.
+    Important: Copy and store your API key securely.
 
+    The key is only displayed once and cannot be viewed again after creation.
+  </Step>
 
-## Step 3 – Obtain a Morpheus API Key
+  <Step title="Create a New Virtual Machine in VirtualBox">
+    Open VirtualBox: Launch VirtualBox on your host machine.
 
+    Create a New Virtual Machine: Click the "New" button in the VirtualBox manager window.
 
-Navigate to the Morpheus website: Morpheus
+    Enter a name for the virtual machine (for example, Ubuntu VM).
 
-Click: Access Inference
+    Select the Ubuntu ISO image downloaded earlier.
 
-If you have an already existing account, then Sign In with your associated details.
+    Verify that the operating system details are detected automatically
 
-If not, then click on the button to Sign Up at the bottom of the form and fill in the correct details as requested.
+    Enter the required installation information:
 
-After successful registration, you will be redirected to the: Inference API Admin Page
+    Username
 
-Create a new API key.
+    Password
 
+    Hostname
 
-### Important: Copy and store your API key securely.
+    Ensure Install Guest Additions is enabled.N.B. Store these details in a safe place as they might be hard to recover if forgotten.
 
+    Memory Allocation: Allocate an appropriate amount of RAM to your virtual machine.
 
+    At least 4GB is recommended for a smooth experience and the Number of CPU’s should at least be 2 as well.
 
-### The key is only displayed once and cannot be viewed again after creation.
+    Create a Virtual Hard Disk: Select "Finish” to create the Virtual Machine.
+  </Step>
 
+  <Step title="Installing Ubuntu in the Virtual Machine">
+    Select the Virtual Machine: In the VirtualBox manager window, select the virtual machine you just created.
 
+    Start the Virtual Machine: Click the "Start" button to start the virtual machine.
 
-## Step 4 – Create a New Virtual Machine in VirtualBox
+    Install Ubuntu: When you start your machine, you will first encounter the GNU GRUB Screen, Select the option “Try or install Ubuntu”.
 
+    Follow the Ubuntu installation wizard.
 
+    Configure:
 
-### Open VirtualBox: Launch VirtualBox on your host machine.
+    Language
 
+    Keyboard Layout
 
-Create a New Virtual Machine: Click the "New" button in the VirtualBox manager window.
+    Time Zone
 
-Enter a name for the virtual machine (for example, Ubuntu VM).
+    Installation Type
 
-Select the Ubuntu ISO image downloaded earlier.
+    User Credentials
 
-Verify that the operating system details are detected automatically
+    Complete the installation and restart the virtual machine when prompted.
 
-Enter the required installation information:
+    Once Ubuntu loads, open Terminal and update the system:
 
-Username
+    ```bash
+    sudo apt update && sudo apt upgrade -y
+    ```
+  </Step>
 
-Password
+  <Step title="Install OpenClaw">
+    Open Terminal inside Ubuntu.
 
-Hostname
+    Run:
 
-Ensure Install Guest Additions is enabled.N.B. Store these details in a safe place as they might be hard to recover if forgotten.
+    ```bash
+    curl -fsSL https://openclaw.ai/install.sh | bash
+    ```
 
-Memory Allocation: Allocate an appropriate amount of RAM to your virtual machine.
+    Wait for the installation to complete.
+  </Step>
 
-At least 4GB is recommended for a smooth experience and the Number of CPU’s should at least be 2 as well.
+  <Step title="OpenClaw Onboarding">
+    When onboarding begins, choose the following options:
 
-Create a Virtual Hard Disk: Select "Finish” to create the Virtual Machine.
+    - **First option:** select Yes
+    - **Setup mode:** select QuickStart
+    - **Model/auth provider:** select Skip for now
+    - **Default model:** select Keep current model — the default (`mor-gateway/glm-5`) works out of the box with a funded key; see [Model Configuration](#model-configuration) below if you later want to switch or add models
+    - **Select channel:** select Skip for now
+    - **Search Provider:** select Skip for now
+    - **Configure skills:** select No
+    - **Enable Hooks:** enable all of them like shown
+    - **Hatch your agent:** select Hatch later
+  </Step>
 
+  <Step title="Install EverClaw (Morpheus Skill)">
+    In Ubuntu Terminal, run:
 
-## Step 5 - Installing Ubuntu in the Virtual Machine#
+    ```bash
+    curl -fsSL https://get.everclaw.xyz | bash
+    ```
 
+    Wait for the installation process to finish successfully.
 
-Select the Virtual Machine: In the VirtualBox manager window, select the virtual machine you just created.
+    The installer will:
 
-Start the Virtual Machine: Click the "Start" button to start the virtual machine.
+    Verify dependencies
 
-Install Ubuntu: When you start your machine, you will first encounter the GNU GRUB Screen, Select the option “Try or install Ubuntu”.
+    Install EverClaw
 
-Follow the Ubuntu installation wizard.
+    Configure OpenClaw integration
 
-Configure:
+    Provision a temporary bootstrap inference key
 
-Language
+    Configure local fallback options
+  </Step>
 
-Keyboard Layout
+  <Step title="Import Your Morpheus API Key">
+    Navigate to the EverClaw directory:
 
-Time Zone
+    ```bash
+    cd ~/.openclaw/workspace/skills/everclaw
+    ```
 
-Installation Type
+    Note: the installed directory is confirmed `everclaw` (verified via fresh-install testing on OpenClaw 2026.7.1-2). If it's missing, run:
 
-User Credentials
+    ```bash
+    ls ~/.openclaw/workspace/skills/
+    ```
 
-Complete the installation and restart the virtual machine when prompted.
+    and use whichever directory is present.
 
-Once Ubuntu loads, open Terminal and update the system:
+    Note: EverClaw's installer (previous step) may already have provisioned a bundled temporary starter key in `evcl-...` format — this is different from your own Morpheus API key (`sk...` format) from the Obtain a Morpheus API Key step above.
+
+    For this step, use your `sk-...` key, not the bundled `evcl-...` one — the bundled key is a fallback, not a replacement for your own account key.
+
+    Run:
+
+    ```bash
+    npm run bootstrap -- --key sk-XXXXXXXXXXXXXXXX
+    ```
+
+    (Replace sk-XXXXXXXXXXXXXXXX with your own Morpheus API key from the Obtain a Morpheus API Key step above.)
+
+    <Note>
+      If this fails with an "insufficient credits" error on a newly created account,
+      see [Insufficient Credits During Bootstrap](#insufficient-credits-during-bootstrap)
+      in Troubleshooting below — note that a confirmed fix for this has not been
+      validated on a genuinely fresh, unfunded account.
+    </Note>
+
+    If successful, EverClaw should display:
+
+    ### Morpheus API Gateway configured!
+  </Step>
+
+  <Step title="Remove the Bonjour Plugin Block (Required)">
+    <Warning>
+      On OpenClaw `2026.7.1-2`, the config generated by onboarding includes a
+      `gateway.plugins.bonjour` block that fails schema validation. If this step is
+      skipped, the next step (`openclaw gateway restart`) will refuse to start:
+
+      ```
+      Invalid config at ~/.openclaw/openclaw.json:
+      - gateway: Invalid input
+      OpenClaw config is invalid
+      Fix: openclaw doctor --fix
+      Gateway aborted: config is invalid.
+      ```
+
+      This is a required step on this version, not optional cleanup.
+    </Warning>
+
+    Open the configuration file:
+
+    ```bash
+    nano ~/.openclaw/openclaw.json
+    ```
+
+    Locate and remove the following block:
+
+    ```json
+    "plugins": {
+      "bonjour": {
+        "enabled": false
+      }
+    }
+    ```
+
+    Save the file:
+
+    ```bash
+    Ctrl + X
+    Y
+    Enter
+    ```
+
+    Then validate before moving on:
+
+    ```bash
+    openclaw config validate
+    ```
+
+    You should see `Config valid: ~/.openclaw/openclaw.json`. If it still reports
+    invalid, check that the block above was removed completely (including its
+    surrounding comma) and didn't leave the JSON malformed.
+
+    <Note>
+      The error output above suggests `openclaw doctor --fix` as an automatic
+      remedy. That path was not exercised while validating this guide — manual
+      removal followed by `openclaw config validate` is what was actually tested.
+      If you try `openclaw doctor --fix` instead, still confirm the result with
+      `openclaw config validate` afterward.
+    </Note>
+  </Step>
+
+  <Step title="Restart the Gateway">
+    Restart OpenClaw:
+
+    ```bash
+    openclaw gateway restart
+    ```
+
+    If Restart Fails:
+
+    ```bash
+    openclaw gateway stop
+    ```
+
+    And then:
+
+    ```bash
+    openclaw gateway start
+    ```
+  </Step>
+
+  <Step title="Launch OpenClaw Chat">
+    ### Run:
+
+    ```bash
+    openclaw chat
+    ```
+
+    You should now be able to use Morpheus models through EverClaw.
+  </Step>
+</Steps>
+
+## Model Configuration
+
+By default, EverClaw configures `mor-gateway/glm-5` as your primary model, and it
+works out of the box with a funded Morpheus API key — you do not need to change it
+to get a working setup. This section is optional reference for anyone who wants to
+switch models or add one that isn't provisioned by default.
+
+### Models Available After Bootstrap
+
+Running `npm run bootstrap` (in the **Import Your Morpheus API Key** step above)
+registers a handful of models under the `mor-gateway` provider automatically:
+
+| Model | Ready to use after bootstrap? |
+|---|---|
+| `mor-gateway/glm-5` (default) | Yes |
+| `mor-gateway/kimi-k2.5` | Yes |
+| `mor-gateway/glm-4.7-flash` | Yes |
+| `mor-gateway/llama-3.3-70b` | Declared, but missing an alias entry — see below |
+| `mor-gateway/deepseek-v4-flash` | Not declared at all — needs the full addition below |
+
+### Switching the Active Model
+
+Use the CLI or the in-chat slash command to change which model is active — you do
+not need to hand-edit `openclaw.json` just to change the primary model:
 
 ```bash
-sudo apt update && sudo apt upgrade -y
+openclaw models set mor-gateway/kimi-k2.5
 ```
 
+or, from inside an OpenClaw chat session:
 
-## Step 6 – Install Openclaw
-
-
-Open Terminal inside Ubuntu.
-
-Run:
-
-```bash
-curl -fsSL https://openclaw.ai/install.sh | bash
+```
+/model mor-gateway/kimi-k2.5
 ```
 
-Wait for the installation to complete.
+Both persist across `openclaw gateway restart` and across new sessions started
+with `/new`.
 
-When onboarding begins, choose the following options:
+<Note>
+  `openclaw models list`, `openclaw models status`, and `openclaw models
+  fallbacks` are also available for inspecting current model and fallback
+  configuration from the CLI.
+</Note>
 
+### Adding a Model That Isn't Fully Provisioned
 
-### For the first option select Yes
+To use a model bootstrap didn't fully provision (for example
+`mor-gateway/deepseek-v4-flash`, or to finish setting up
+`mor-gateway/llama-3.3-70b`), two changes to `~/.openclaw/openclaw.json` are
+needed:
 
-
-
-### For the Setup mode select QuickStart
-
-
-
-### For the Model/auth provider select Skip for now
-
-
-
-### For the Default model select Keep current model
-
-
-When asked to Select channel select Skip for now as well
-
-
-### For the Search Provider also select Skip for now
-
-
-Select No when asked whether to configure skills
-
-When asked to Enable Hooks, enable all of them like shown
-
-
-### When asked how you want to Hatch your agent, select Hatch later
-
-
-
-## Step 7 – Install EverClaw (Morpheus Skill)
-
-
-In Ubuntu Terminal, run:
-
-```bash
-curl -fsSL https://get.everclaw.xyz | bash
-```
-
-Wait for the installation process to finish successfully.
-
-The installer will:
-
-Verify dependencies
-
-Install EverClaw
-
-Configure OpenClaw integration
-
-Provision a temporary bootstrap inference key
-
-Configure local fallback options
-
-
-## Step 8 – Import Your Morpheus API Key
-
-
-1. Navigate to the EverClaw directory:
-
-```bash
-cd ~/.openclaw/workspace/skills/everclaw
-```
-
-Note: the installed directory name has been observed as both “everclaw” and “everclaw-inference” depending on install script/version. If the path above doesn't exist, check: ls ~/.openclaw/workspace/skills/ and use whichever directory is present.
-
-Note: EverClaw's installer (Step 7) may already have provisioned a bundled temporary starter key in `evcl-...` format — this is different from your own Morpheus API key (`sk...` format) from Step 3.
-
-For this step, use your `sk-...` key, not the bundled `evcl-...` one — the bundled key is a fallback, not a replacement for your own account key.
-
-Run:
-
-```bash
-npm run bootstrap -- --key sk-XXXXXXXXXXXXXXXX
-```
-
-(Replace sk-XXXXXXXXXXXXXXXX with your own Morpheus API key from Step 3.)
-
-⚠️ Known issue: newly created accounts may not have sufficient credits to complete bootstrap. If Step 8 fails with an "insufficient credits" error, this is a known platform limitation, not a setup mistake — see the troubleshooting note after Step 8 for the current workaround.
-
-If successful, EverClaw should display:
-
-
-### Morpheus API Gateway configured!
-
-
-
-## Step 9 – Edit OpenClaw Configuration
-
-
-Open the configuration file:
-
-
-### nano ~/.openclaw/openclaw.json
-
-
-Locate and remove the following section:
+**1. Declare the model under `models.providers.mor-gateway.models`** (skip this
+part if it's already declared, as with `llama-3.3-70b`):
 
 ```json
-"plugins": {
-  "bonjour": {
-    "enabled": false
-  }
+{
+  "id": "deepseek-v4-flash",
+  "name": "DeepSeek V4 Flash (via Morpheus Gateway)",
+  "reasoning": false,
+  "input": ["text"],
+  "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+  "contextWindow": 131072,
+  "maxTokens": 8192
 }
 ```
 
-Save the file:
+**2. Add an alias entry under `agents.defaults.models`:**
 
-```bash
-Ctrl + X
-Y
-Enter
+```json
+"mor-gateway/deepseek-v4-flash": {
+  "alias": "DeepSeek V4 Flash (Gateway)",
+  "streaming": true
+}
 ```
 
-
-## Step 10 – Restart the Gateway
-
-
-Restart OpenClaw:
+Then validate and restart:
 
 ```bash
+openclaw config validate
 openclaw gateway restart
 ```
 
-If Restart Fails:
+Once declared, make the model active with `openclaw models set` or `/model` (see
+above) — don't hand-edit a `primary` field to switch models.
+
+If you already have a session open, start a new one so it picks up the change:
+`/new mor-gateway/deepseek-v4-flash`.
+
+## Diagnostics
+
+EverClaw ships a diagnostic script that checks your setup end-to-end:
 
 ```bash
-openclaw gateway stop
+bash ~/.openclaw/workspace/skills/everclaw/scripts/diagnose.sh
 ```
 
-And then:
+<Note>
+  If you're following this guide (API Gateway only, no Morpheus proxy-router / P2P
+  components installed), expect several checks to report as failed. That's
+  expected — the script also tests the Native/P2P path, which this guide doesn't
+  set up. A result like "10 passed, 1 warning, 5 failures" can still mean a fully
+  healthy Gateway-only install.
+</Note>
 
-```bash
-openclaw gateway start
+### Failures That Are Expected in Gateway-Only Mode
+
+Safe to ignore if you're following this guide — they indicate the Native/P2P path
+isn't installed, not that the Gateway path is broken:
+
+- `Proxy-router not responding` (port 8082)
+- `Morpheus proxy not responding` (port 8083)
+- Inference test timeout against `morpheus/kimi-k2.5` (this targets the P2P path)
+- `Auth profiles file not found` (warning)
+
+The check that actually confirms your Gateway install is working is:
+
+```
+✅ Morpheus API Gateway reachable (api.mor.org → HTTP 200)
 ```
 
+### Failures Worth Acting On
 
-## Step 11 – Launch OpenClaw Chat
+- **Models with `reasoning: true` (causes HTTP 400)** — set `"reasoning": false`
+  for the affected model under `models.providers.mor-gateway.models` in
+  `~/.openclaw/openclaw.json`.
+- **Models missing `streaming: true`** — can cause timeouts on slow connections.
+  Run `node ~/.openclaw/workspace/skills/everclaw/scripts/setup.mjs --apply`, or
+  add `"streaming": true` manually (see [Model Configuration](#model-configuration)
+  above).
 
-
-
-### Run:
-
-
-```bash
-openclaw chat
-```
-
-You should now be able to use Morpheus models through EverClaw.
-
+After making changes, restart the gateway: `openclaw gateway restart`.
 
 ## Troubleshooting
 
+### Insufficient Credits During Bootstrap
 
+<Warning>
+  This has not been re-confirmed on a genuinely fresh, unfunded account — the most
+  recent validation pass used a pre-funded account, so this failure mode itself
+  was not reproduced or re-tested. The workaround below is carried over from
+  earlier reports as a best-effort suggestion, not a validated fix.
+</Warning>
 
-### Insufficient credits during Step 8
+If `npm run bootstrap -- --key sk-...` fails with an "insufficient credits" error:
 
+**Suggested workaround (unverified):** skip `npm run bootstrap` and instead add
+your Morpheus API key directly under `models.providers.mor-gateway.apiKey` in
+`~/.openclaw/openclaw.json`, then continue to the **Remove the Bonjour Plugin
+Block** step.
 
-Known issue with newly created accounts.
+If this doesn't resolve it, treat it as an account/credits issue on the Morpheus
+side rather than a setup mistake.
 
-Workaround:
+### EverClaw shows "needs setup" / "visible to model: no" even after being enabled
 
-skip `npm run bootstrap` entirely.
-
-Instead, manually add your Morpheus API key directly into `~/.openclaw/openclaw.json`,
-
-Then continue to Step 9.
-
-
-### Model too expensive for the hosted API gateway
-
-
-The hosted gateway currently supports only a subset of models, and capacity is actively
-
-expanding — this can occur even with a funded key.
-
-Workaround:
-
-This requires two changes in ~/.openclaw/openclaw.json: (1) add the model as a new entry under models.providers.mor-gateway.models (it may not be declared there by default), and (2) set "primary" to the provider-qualified name, e.g. "mor-gateway/deepseek-v4-flash" -- not the bare model name, which gets misinterpreted as a different provider and can trigger a fallback to a local model.
-
-Then restart the gateway (Step 10).
-
-After changing the model, also start a clean session: /new mor-gateway/`<model-name>` (e.g. /new mor-gateway/deepseek-v4-flash). Restarting the gateway does not clear an already-open session's model selection -- an existing session can keep using its previous fallback model even after the config is corrected.
-
-
-### EverClaw shows “needs setup” / “visible to model: no” even after being enabled
-
-
-Some installed versions of EverClaw's SKILL.md declare optional environment variables as objects, but the running OpenClaw version may expect requires.env as a plain string array. This mismatch can show as: environment: ✗ [object object], ✗ [object object]. Fix: open the skill's SKILL.md (in the everclaw/ or everclaw-inference/ directory, see the note above), back it up, remove the env: block under requires: while keeping bins:, then run: openclaw gateway restart && openclaw skills info everclaw. Expect ready and visible to model: yes when fixed.
-
+Some installed versions of EverClaw's SKILL.md declare optional environment variables as objects, but the running OpenClaw version may expect requires.env as a plain string array. This mismatch can show as: environment: ✗ [object object], ✗ [object object]. Fix: open the skill's SKILL.md (in the `everclaw` directory), back it up, remove the env: block under requires: while keeping bins:, then run: openclaw gateway restart && openclaw skills info everclaw. Expect ready and visible to model: yes when fixed.
 
 ### Asking the model to use EverClaw doesn't seem to do anything
 
-
 EverClaw is not a /everclaw slash command. It installs a permanent inference connection (used automatically for ordinary chat, no invocation needed) and separately ships a diagnostic/setup skill that only activates for matching natural-language requests, e.g. "use the everclaw skill to perform a read-only diagnosis of my morpheus setup." Verify the skill itself is working with: openclaw skills info everclaw (look for ready and visible to model: yes) rather than relying on the model's own claims.
-
-Both workarounds were confirmed to result in successful authentication and
-
-working inference.

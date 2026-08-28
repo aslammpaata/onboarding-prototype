@@ -27,11 +27,19 @@ concepts are identical, only the shell syntax differs.
 
 ## Before You Start
 
+**What this is, in one sentence:** running a Morpheus proxy-router with no GUI at all
+and talking to it directly over raw HTTP/`curl` — the exact calls that `morctl`
+automates for you.
+
 **What you'll need:**
 - **Windows:** PowerShell (built in).
 - **WSL2/Linux:** a working WSL2 install or native Linux, `bash`.
 - A funded wallet — at least 5 MOR and a small amount of Base ETH on Base mainnet.
 - `curl`, available by default on both platforms.
+
+---
+
+## Security Considerations
 
 > 🔐 **You'll be handling a real private key in this guide.** Never write it to a
 > committed file, never paste it into chat tools, and clear it from your shell history
@@ -39,210 +47,202 @@ concepts are identical, only the shell syntax differs.
 
 ---
 
-## Step 1: Get the Router Binary
+## Walkthrough
 
-**WSL2/Linux:**
-```bash
-mkdir -p ~/morpheus && cd ~/morpheus
-wget "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases/download/v7.3.0/linux-x86_64-morpheus-router-7.3.0" -O proxy-router
-chmod +x proxy-router
-```
+<Steps>
+  <Step title="Get the Router Binary">
+    **WSL2/Linux:**
+    ```bash
+    mkdir -p ~/morpheus && cd ~/morpheus
+    wget "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases/download/v7.3.0/linux-x86_64-morpheus-router-7.3.0" -O proxy-router
+    chmod +x proxy-router
+    ```
 
-**Windows (PowerShell):**
-```powershell
-mkdir C:\morpheus; cd C:\morpheus
-Invoke-WebRequest "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases/download/v7.3.0/win-x64-morpheus-router-7.3.0.exe" -OutFile proxy-router.exe
-```
+    **Windows (PowerShell):**
+    ```powershell
+    mkdir C:\morpheus; cd C:\morpheus
+    Invoke-WebRequest "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases/download/v7.3.0/win-x64-morpheus-router-7.3.0.exe" -OutFile proxy-router.exe
+    ```
 
-> ⚠️ Check the [releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
-> for the current version — filenames change between releases. Avoid any `-test`-suffixed
-> release unless you specifically want testnet.
+    > ⚠️ Check the [releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
+    > for the current version — filenames change between releases. Avoid any `-test`-suffixed
+    > release unless you specifically want testnet.
 
-✅ You have a router binary.
+    ✅ You have a router binary.
+  </Step>
 
----
+  <Step title="Configure .env">
+    Both platforms use the same variables — only the shell syntax for creating the file differs.
 
-## Step 2: Configure `.env`
+    **WSL2/Linux:**
+    ```bash
+    cat > .env << 'EOF'
+    ETH_NODE_ADDRESS=https://mainnet.base.org
+    ETH_NODE_CHAIN_ID=8453
+    DIAMOND_CONTRACT_ADDRESS=0x6aBE1d282f72B474E54527D93b979A4f64d3030a
+    MOR_TOKEN_ADDRESS=0x7431aDa8a591C955a994a21710752EF9b882b8e3
+    WALLET_PRIVATE_KEY=
+    MODELS_CONFIG_PATH=./models-config.json
+    COOKIE_FILE_PATH=./.cookie
+    WEB_ADDRESS=0.0.0.0:8082
+    PROXY_ADDRESS=0.0.0.0:3333
+    PROXY_STORAGE_PATH=./data/
+    EOF
+    ```
 
-Both platforms use the same variables — only the shell syntax for creating the file differs.
+    **Windows (PowerShell):**
+    ```powershell
+    @"
+    ETH_NODE_ADDRESS=https://mainnet.base.org
+    ETH_NODE_CHAIN_ID=8453
+    DIAMOND_CONTRACT_ADDRESS=0x6aBE1d282f72B474E54527D93b979A4f64d3030a
+    MOR_TOKEN_ADDRESS=0x7431aDa8a591C955a994a21710752EF9b882b8e3
+    WALLET_PRIVATE_KEY=
+    MODELS_CONFIG_PATH=./models-config.json
+    COOKIE_FILE_PATH=./.cookie
+    WEB_ADDRESS=0.0.0.0:8082
+    PROXY_ADDRESS=0.0.0.0:3333
+    PROXY_STORAGE_PATH=./data/
+    "@ | Out-File -Encoding ascii .env
+    ```
 
-**WSL2/Linux:**
-```bash
-cat > .env << 'EOF'
-ETH_NODE_ADDRESS=https://mainnet.base.org
-ETH_NODE_CHAIN_ID=8453
-DIAMOND_CONTRACT_ADDRESS=0x6aBE1d282f72B474E54527D93b979A4f64d3030a
-MOR_TOKEN_ADDRESS=0x7431aDa8a591C955a994a21710752EF9b882b8e3
-WALLET_PRIVATE_KEY=
-MODELS_CONFIG_PATH=./models-config.json
-COOKIE_FILE_PATH=./.cookie
-WEB_ADDRESS=0.0.0.0:8082
-PROXY_ADDRESS=0.0.0.0:3333
-PROXY_STORAGE_PATH=./data/
-EOF
-```
+    Note `WALLET_PRIVATE_KEY` is left **blank** — you'll inject it live in Step 3, not store
+    it in this file.
 
-**Windows (PowerShell):**
-```powershell
-@"
-ETH_NODE_ADDRESS=https://mainnet.base.org
-ETH_NODE_CHAIN_ID=8453
-DIAMOND_CONTRACT_ADDRESS=0x6aBE1d282f72B474E54527D93b979A4f64d3030a
-MOR_TOKEN_ADDRESS=0x7431aDa8a591C955a994a21710752EF9b882b8e3
-WALLET_PRIVATE_KEY=
-MODELS_CONFIG_PATH=./models-config.json
-COOKIE_FILE_PATH=./.cookie
-WEB_ADDRESS=0.0.0.0:8082
-PROXY_ADDRESS=0.0.0.0:3333
-PROXY_STORAGE_PATH=./data/
-"@ | Out-File -Encoding ascii .env
-```
+    ✅ Router configured.
+  </Step>
 
-Note `WALLET_PRIVATE_KEY` is left **blank** — you'll inject it live in Step 3, not store
-it in this file.
+  <Step title="Start the Router and Provide a Wallet">
+    **Terminal 1 — start the router, leave it running:**
+    ```bash
+    ./proxy-router          # Linux/WSL2
+    .\proxy-router.exe       # Windows
+    ```
+    Wait for `proxy state: waiting for private key` in the log.
 
-✅ Router configured.
+    <Frame>
+      <img src="/native-path/images/headless-developer-setup-01-waiting-for-private-key.png" alt="proxy-router log output showing 'proxy state: waiting for private key' before the wallet is injected" />
+    </Frame>
 
----
+    **Terminal 2 — inject your wallet:**
 
-## Step 3: Start the Router and Provide a Wallet
+    *WSL2/Linux:*
+    ```bash
+    cd ~/morpheus
+    read -rs PK
+    printf '{"privateKey":"%s"}' "$PK" \
+      | curl -X POST 'http://localhost:8082/wallet/privateKey' \
+        -H 'Content-Type: application/json' -u "$(cat .cookie)" --data-binary @-
+    unset PK
+    ```
 
-**Terminal 1 — start the router, leave it running:**
-```bash
-./proxy-router          # Linux/WSL2
-.\proxy-router.exe       # Windows
-```
-Wait for `proxy state: waiting for private key` in the log.
+    *Windows (PowerShell):*
+    ```powershell
+    cd C:\morpheus
+    $PK = Read-Host -AsSecureString "Private key" | ConvertFrom-SecureString -AsPlainText
+    $cookie = Get-Content .cookie
+    $user, $pass = $cookie -split ":", 2
+    $b64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("$($user):$($pass)"))
+    $body = @{ privateKey = $PK } | ConvertTo-Json
+    Invoke-RestMethod -Uri "http://localhost:8082/wallet/privateKey" -Method POST `
+      -Headers @{ Authorization = "Basic $b64" } -ContentType "application/json" -Body $body
+    Remove-Variable PK
+    ```
 
-<Frame>
-  <img src="/native-path/images/headless-developer-setup-01-waiting-for-private-key.png" alt="proxy-router log output showing 'proxy state: waiting for private key' before the wallet is injected" />
-</Frame>
+    **Back in Terminal 1**, the log should flip from "waiting" to reporting your wallet
+    address and MOR/ETH balance.
 
-**Terminal 2 — inject your wallet:**
+    <Frame>
+      <img src="/native-path/images/headless-developer-setup-02-wallet-loaded-transition.png" alt="Terminal 1 log transitioning from 'waiting for private key' to showing the loaded wallet address and MOR/ETH balance after injection" />
+    </Frame>
 
-*WSL2/Linux:*
-```bash
-cd ~/morpheus
-read -rs PK
-printf '{"privateKey":"%s"}' "$PK" \
-  | curl -X POST 'http://localhost:8082/wallet/privateKey' \
-    -H 'Content-Type: application/json' -u "$(cat .cookie)" --data-binary @-
-unset PK
-```
+    This is your confirmation the key worked — annotate: *"If this doesn't appear, the key wasn't accepted — check Terminal 2's response for an error."*
 
-*Windows (PowerShell):*
-```powershell
-cd C:\morpheus
-$PK = Read-Host -AsSecureString "Private key" | ConvertFrom-SecureString -AsPlainText
-$cookie = Get-Content .cookie
-$user, $pass = $cookie -split ":", 2
-$b64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("$($user):$($pass)"))
-$body = @{ privateKey = $PK } | ConvertTo-Json
-Invoke-RestMethod -Uri "http://localhost:8082/wallet/privateKey" -Method POST `
-  -Headers @{ Authorization = "Basic $b64" } -ContentType "application/json" -Body $body
-Remove-Variable PK
-```
+    ✅ Router is running with a real, funded wallet, key never written to disk.
+  </Step>
 
-**Back in Terminal 1**, the log should flip from "waiting" to reporting your wallet
-address and MOR/ETH balance.
+  <Step title="Open a Session">
+    ```bash
+    curl -s -X POST 'http://localhost:8082/blockchain/models/<MODEL_ID>/session' \
+      -H 'Content-Type: application/json' \
+      -u "$(cat .cookie)" \
+      -d '{"sessionDuration": 600, "failover": true, "directPayment": false}'
+    ```
+    (Same command on Windows PowerShell, or use `Invoke-RestMethod` with the auth header
+    pattern from Step 3.)
 
-<Frame>
-  <img src="/native-path/images/headless-developer-setup-02-wallet-loaded-transition.png" alt="Terminal 1 log transitioning from 'waiting for private key' to showing the loaded wallet address and MOR/ETH balance after injection" />
-</Frame>
+    Get a real `<MODEL_ID>` from `GET /blockchain/models`, or from the Desktop App's Models
+    tab.
 
-This is your confirmation the key worked — annotate: *"If this doesn't appear, the key wasn't accepted — check Terminal 2's response for an error."*
+    The response includes a `sessionID` field:
+    ```json
+    {"sessionID":"0xa3e0ac1a374208b4420d84af96a2f7b27b34d5bbe742be9f8c656"}
+    ```
+    Copy this — you need it for every inference call in this session.
 
-✅ Router is running with a real, funded wallet, key never written to disk.
+    ✅ Session open, MOR staked.
+  </Step>
 
----
+  <Step title="Run Inference">
+    ```bash
+    curl -s -X POST 'http://localhost:8082/v1/chat/completions' \
+      -H 'Content-Type: application/json' \
+      -H "session_id: <SESSION_ID>" \
+      -u "$(cat .cookie)" \
+      -d '{"messages": [{"role": "user", "content": "Hello. Tell me about AI."}]}'
+    ```
 
-## Step 4: Open a Session
+    Tip: append `| python3 -m json.tool` for readable output.
 
-```bash
-curl -s -X POST 'http://localhost:8082/blockchain/models/<MODEL_ID>/session' \
-  -H 'Content-Type: application/json' \
-  -u "$(cat .cookie)" \
-  -d '{"sessionDuration": 600, "failover": true, "directPayment": false}'
-```
-(Same command on Windows PowerShell, or use `Invoke-RestMethod` with the auth header
-pattern from Step 3.)
+    ✅ You've run raw inference with no client library at all.
+  </Step>
 
-Get a real `<MODEL_ID>` from `GET /blockchain/models`, or from the Desktop App's Models
-tab.
+  <Step title="Multi-Turn Conversation (Optional)">
+    ⚠️ **The router does not remember previous messages on its own** — this is intended
+    behavior, not a bug (confirmed by maintainers). Two ways to get real conversation memory:
 
-The response includes a `sessionID` field:
-```json
-{"sessionID":"0xa3e0ac1a374208b4420d84af96a2f7b27b34d5bbe742be9f8c656"}
-```
-Copy this — you need it for every inference call in this session.
+    **Option A — resend full history yourself** (what `morctl --interactive` does
+    automatically): include every prior message in the `messages` array on each call.
 
-✅ Session open, MOR staked.
+    **Option B — use a `chat_id`** to have the router persist and prepend history for you:
+    ```bash
+    CHAT_ID=0x$(openssl rand -hex 32)
 
----
+    curl -s -X POST 'http://localhost:8082/v1/chat/completions' \
+      -H 'Content-Type: application/json' \
+      -H "session_id: <SESSION_ID>" -H "chat_id: $CHAT_ID" \
+      -u "$(cat .cookie)" \
+      -d '{"messages":[{"role":"user","content":"My name is Alex."}]}'
 
-## Step 5: Run Inference
+    curl -s -X POST 'http://localhost:8082/v1/chat/completions' \
+      -H 'Content-Type: application/json' \
+      -H "session_id: <SESSION_ID>" -H "chat_id: $CHAT_ID" \
+      -u "$(cat .cookie)" \
+      -d '{"messages":[{"role":"user","content":"What is my name?"}]}'
+    ```
+    Requires `PROXY_STORE_CHAT_CONTEXT=true` and `PROXY_FORWARD_CHAT_CONTEXT=true` in your
+    `.env`. History for a given `chat_id` is viewable locally at
+    `./data/chats/<CHAT_ID>.json`.
 
-```bash
-curl -s -X POST 'http://localhost:8082/v1/chat/completions' \
-  -H 'Content-Type: application/json' \
-  -H "session_id: <SESSION_ID>" \
-  -u "$(cat .cookie)" \
-  -d '{"messages": [{"role": "user", "content": "Hello. Tell me about AI."}]}'
-```
+    ✅ Genuine multi-turn conversation via the raw API.
+  </Step>
 
-Tip: append `| python3 -m json.tool` for readable output.
+  <Step title="Session Lifecycle — What Happens Next">
+    - **Let it expire naturally.** Your node auto-submits the close transaction ~1 minute
+      after `endsAt`, and your stake is eligible for return.
+    - **Stake return is not automatic or instant.** As of the current router version, the
+      full stake goes through a hold/maturation period (roughly 24 hours) before it's
+      claimable, and claiming currently requires a **separate manual call** to
+      `withdrawUserStakes` on the Diamond contract (via Basescan's Write tab, or a direct
+      contract call) — this is not yet exposed through the router's HTTP API. Track
+      [issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827) for
+      when an API for this ships.
+    - **Don't close early** unless you have a reason to — early closes route through the
+      same hold mechanism with no offsetting benefit.
 
-✅ You've run raw inference with no client library at all.
-
----
-
-## Step 6: Multi-Turn Conversation (Optional)
-
-⚠️ **The router does not remember previous messages on its own** — this is intended
-behavior, not a bug (confirmed by maintainers). Two ways to get real conversation memory:
-
-**Option A — resend full history yourself** (what `morctl --interactive` does
-automatically): include every prior message in the `messages` array on each call.
-
-**Option B — use a `chat_id`** to have the router persist and prepend history for you:
-```bash
-CHAT_ID=0x$(openssl rand -hex 32)
-
-curl -s -X POST 'http://localhost:8082/v1/chat/completions' \
-  -H 'Content-Type: application/json' \
-  -H "session_id: <SESSION_ID>" -H "chat_id: $CHAT_ID" \
-  -u "$(cat .cookie)" \
-  -d '{"messages":[{"role":"user","content":"My name is Alex."}]}'
-
-curl -s -X POST 'http://localhost:8082/v1/chat/completions' \
-  -H 'Content-Type: application/json' \
-  -H "session_id: <SESSION_ID>" -H "chat_id: $CHAT_ID" \
-  -u "$(cat .cookie)" \
-  -d '{"messages":[{"role":"user","content":"What is my name?"}]}'
-```
-Requires `PROXY_STORE_CHAT_CONTEXT=true` and `PROXY_FORWARD_CHAT_CONTEXT=true` in your
-`.env`. History for a given `chat_id` is viewable locally at
-`./data/chats/<CHAT_ID>.json`.
-
-✅ Genuine multi-turn conversation via the raw API.
-
----
-
-## Step 7: Session Lifecycle — What Happens Next
-
-- **Let it expire naturally.** Your node auto-submits the close transaction ~1 minute
-  after `endsAt`, and your stake is eligible for return.
-- **Stake return is not automatic or instant.** As of the current router version, the
-  full stake goes through a hold/maturation period (roughly 24 hours) before it's
-  claimable, and claiming currently requires a **separate manual call** to
-  `withdrawUserStakes` on the Diamond contract (via Basescan's Write tab, or a direct
-  contract call) — this is not yet exposed through the router's HTTP API. Track
-  [issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827) for
-  when an API for this ships.
-- **Don't close early** unless you have a reason to — early closes route through the
-  same hold mechanism with no offsetting benefit.
-
-✅ You understand the full lifecycle, including the part that trips people up.
+    ✅ You understand the full lifecycle, including the part that trips people up.
+  </Step>
+</Steps>
 
 ---
 

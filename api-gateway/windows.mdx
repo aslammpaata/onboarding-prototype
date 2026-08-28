@@ -2,493 +2,534 @@
 title: "API Gateway: Windows (WSL2) Setup"
 ---
 
-
 Morpheus Skill Installation Guide (Windows)
 
+## Before You Start
 
-## Prerequisites
+**What this is, in one sentence:** installing OpenClaw (an AI agent CLI) and EverClaw
+(the Morpheus inference skill) inside WSL2 so your agent can call Morpheus-hosted
+models through the API Gateway — no wallet or local node required.
 
+**What you'll need:**
 
-Before beginning the installation process, ensure your computer meets the following requirements:
-
-
-### Operating System
-
-
-Windows 10 (version 2004 or newer) or Windows 11
-
-Administrative privileges for software installation and WSL configuration
-
-
-### Hardware
-
-
-Minimum 8 GB RAM (16 GB recommended)
-
-At least 20 GB of available storage
-
-Multi-core processor with virtualization support enabled in BIOS/UEFI
-
-
-### Network Connectivity
-
-
-Internet access for downloading dependencies, software packages, and AI model configurations
-
-
-### Accounts and Credentials
-
-
-A Morpheus account
-
-A Morpheus Inference API Key (obtained during this guide)
-
-
-### Software Dependencies
-
-
-The following software will be installed during the guide if not already present:
-
-Node.js
-
-Git
-
-WSL2 (Ubuntu)
-
+| | Requirement |
+|---|---|
+| OS | Windows 10 (version 2004+) or Windows 11, with administrative privileges (software install + WSL configuration) |
+| Hardware | 8 GB RAM (16 GB recommended), 20 GB free storage, multi-core CPU with virtualization enabled in BIOS/UEFI |
+| Network | Internet access (dependencies, packages, AI model configurations) |
+| Accounts | A Morpheus account, plus a Morpheus Inference API Key (you'll create the key in this guide) |
+| Software | Node.js, Git, WSL2 (Ubuntu) — installed during this guide if not already present |
 
 ## Security Considerations
 
-
 OpenClaw and EverClaw provide AI agents with access to local system resources. Before installation, users should understand the following security implications.
 
-
-### 1. Local File Access
-
+### 1. Local File & Command Access
 
 AI agents may be able to:
 
-Read files within accessible directories
+- Read files within accessible directories
+- Create or modify files
+- Execute approved system commands
 
-Create or modify files
-
-Execute approved system commands
-
-Avoid storing sensitive information in directories accessible to experimental agents.
-
+Only install trusted skills, review commands before approving execution, and avoid storing sensitive information in directories accessible to experimental agents.
 
 ### 2. API Key Protection
 
+Treat API keys as confidential credentials. Do not:
 
-Treat API keys as confidential credentials.
+- Share keys publicly
+- Commit keys to Git repositories
+- Include keys in screenshots or documentation
 
-Do not:
+Store keys securely and regenerate them immediately if exposed.
 
-Share keys publicly
+### 3. Network Communications
 
-Commit keys to Git repositories
+Models accessed through Morpheus Gateway communicate with external inference providers over the internet. Users should be aware that:
 
-Include keys in screenshots or documentation
+- Prompts may be transmitted to remote AI services
+- Provider privacy policies may differ
+- Sensitive personal or corporate information should not be submitted without understanding the provider's data handling practices
 
-
-### Store keys securely and regenerate them immediately if exposed.
-
-
-
-### 3. Command Execution
-
-
-Some OpenClaw skills and tools can execute shell commands.
-
-Only:
-
-Install trusted skills
-
-Review commands before approving execution
-
-Understand the actions being performed
-
-
-### 4. Network Communications
-
-
-Models accessed through Morpheus Gateway communicate with external inference providers over the internet.
-
-Users should be aware that:
-
-Prompts may be transmitted to remote AI services
-
-Provider privacy policies may differ
-
-Sensitive personal or corporate information should not be submitted without understanding the provider's data handling practices
-
-
-### 5. Principle of Least Privilege
-
+### 4. Principle of Least Privilege & Resource Usage
 
 Whenever possible:
 
-Use standard user accounts instead of administrator accounts
+- Use standard user accounts instead of administrator accounts
+- Limit filesystem permissions
+- Install only required skills and integrations
 
-Limit filesystem permissions
+### 5. WSL2 Isolation
 
-Install only required skills and integrations
-
+WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw inside a separate Linux environment rather than directly on Windows. While it's not a replacement for good security practices, it helps contain any issues within the WSL2 environment and reduces the risk of affecting the main Windows installation.
 
 ## Installation
 
+<Steps>
+  <Step title="Verify Node.js Installation">
+    Open Command Prompt or PowerShell and run:
 
+    ```bash
+    node --version
+    ```
 
-## Step 1 – Verify Node.js Installation
+    If Node.js is installed and up to date, continue to the next step.
 
+    Need to install Node?
 
-Open Command Prompt or PowerShell and run:
+    Navigate to the official Node.js Website: [Node.js — Download Node.js®](https://nodejs.org/en/download)
+
+    Download the prebuilt Windows installer for:
+
+    Windows, x64 Architecture, Latest LTS or Current Release
+
+    After Installing Node.js and then verify installation using:
+
+    ```bash
+    node --version
+    ```
+  </Step>
+
+  <Step title="Verify Git Installation">
+    Open Command Prompt or PowerShell and run:
+
+    ```bash
+    git --version
+    ```
+
+    If Git is installed, continue to the next step.
+
+    Need to install Git?
+
+    To Install Git, navigate to official Git Website and download the latest version: Git - Install for Windows
+
+    After installation, verify with:
+
+    ```bash
+    git --version
+    ```
+  </Step>
+
+  <Step title="Obtain a Morpheus API Key">
+    Navigate to the Morpheus website: Morpheus
+
+    Click: Access Inference
+
+    If you have an already existing account, then Sign In with your associated details.
+
+    If not, then click on the button to Sign Up at the bottom of the form and fill in the correct details as requested.
+
+    After successful registration, you will be redirected to the: Inference API Admin Page
+
+    Create a new API key.
+
+    Important: Copy and store your API key securely.
+
+    The key is only displayed once and cannot be viewed again after creation.
+  </Step>
+
+  <Step title="Installing WSL (Ubuntu)">
+    Note: WSL2 is not optional for this guide specifically because of EverClaw -- EverClaw's supported platforms are macOS, Linux, and Windows via WSL2 only. Native Windows shells (PowerShell, Command Prompt, Git Bash, MSYS, Cygwin) are not supported for EverClaw, even though OpenClaw itself may run there. Complete all remaining steps inside the WSL2 Ubuntu terminal, not in PowerShell directly (PowerShell is only used here to install WSL2 itself).
+
+    Open PowerShell as Administrator
+
+    Run:
+
+    ```bash
+    wsl --install
+    ```
+
+    Wait for Windows to:
+
+    Enable WSL
+
+    Install the Linux kernel
+
+    Configure WSL 2 as default
+
+    Install Ubuntu
+
+    Restart your computer when prompted.
+
+    ### Create Your Ubuntu User
+
+    After rebooting:
+
+    Open Ubuntu from the Start Menu
+
+    Enter a username
+
+    Enter a password
+
+    Confirm the password
+
+    Note:
+
+    Password characters will not appear while typing. This is normal.
+
+    ### Launch Ubuntu
+
+    Open PowerShell and enter:
+
+    wsl
+
+    This will open your Ubuntu environment.
+
+    Update Ubuntu:
+
+    Run:
+
+    ```bash
+    sudo apt update && sudo apt upgrade -y
+    ```
+  </Step>
+
+  <Step title="Install OpenClaw">
+    Inside Ubuntu, run:
+
+    ```bash
+    curl -fsSL https://openclaw.ai/install.sh | bash
+    ```
+
+    Wait for the installation to complete.
+  </Step>
+
+  <Step title="OpenClaw Onboarding">
+    Run:
+
+    ```bash
+    openclaw onboard --install-daemon
+    ```
+
+    The wizard walks you through choosing a model provider, setting an API key, and configuring the Gateway. It takes about 2 minutes.
+
+    - **First option:** select Yes
+    - **Setup mode:** select QuickStart
+    - **Model/auth provider:** select Skip for now
+    - **Default model:** select Keep current model — the default (`mor-gateway/glm-5`) works out of the box with a funded key; see [Model Configuration](#model-configuration) below if you later want to switch or add models
+    - **Select channel:** select Skip for now
+    - **Search Provider:** select Skip for now
+    - **Configure skills:** select No
+    - **Enable Hooks:** enable all of them like shown
+    - **Hatch your agent:** select Hatch later
+  </Step>
+
+  <Step title="Install EverClaw (Morpheus Skill)">
+    Inside Ubuntu, run:
+
+    ```bash
+    curl -fsSL https://get.everclaw.xyz | bash
+    ```
+
+    Or
+
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/EverClaw/EverClaw/main/packages/core/scripts/install-with-deps.sh | bash
+    ```
+
+    Wait for the installation to complete successfully.
+
+    The installer will:
+
+    Verify dependencies
+
+    Install EverClaw
+
+    Configure OpenClaw integration
+
+    Provision a temporary bootstrap inference key
+
+    Configure local fallback options
+  </Step>
+
+  <Step title="Import Your Morpheus API Key">
+    Navigate to the EverClaw directory:
+
+    ```bash
+    cd ~/.openclaw/workspace/skills/everclaw
+    ```
+
+    Note: the installed directory is confirmed `everclaw` (verified via fresh-install testing on OpenClaw 2026.7.1-2). If it's missing, run:
+
+    ```bash
+    ls ~/.openclaw/workspace/skills/
+    ```
+
+    and use whichever directory is present.
+
+    Note: EverClaw's installer (previous step) may already have provisioned a bundled temporary starter key in `evcl-...` format — this is different from your own Morpheus API key (`sk...` format) from the Obtain a Morpheus API Key step above.
+
+    For this step, use your `sk-...` key, not the bundled `evcl-...` one — the bundled key is a fallback, not a replacement for your own account key.
+
+    Run:
+
+    ```bash
+    npm run bootstrap -- --key sk-XXXXXXXXXXXXXXXX
+    ```
+
+    (Replace sk-XXXXXXXXXXXXXXXX with your own Morpheus API key from the Obtain a Morpheus API Key step above.)
+
+    <Note>
+      If this fails with an "insufficient credits" error on a newly created account,
+      see [Insufficient Credits During Bootstrap](#insufficient-credits-during-bootstrap)
+      in Troubleshooting below — note that a confirmed fix for this has not been
+      validated on a genuinely fresh, unfunded account.
+    </Note>
+
+    If successful, EverClaw should display:
+
+    ### Morpheus API Gateway configured!
+  </Step>
+
+  <Step title="Remove the Bonjour Plugin Block (Required)">
+    <Warning>
+      On OpenClaw `2026.7.1-2`, the config generated by onboarding includes a
+      `gateway.plugins.bonjour` block that fails schema validation. If this step is
+      skipped, the next step (`openclaw gateway restart`) will refuse to start:
+
+      ```
+      Invalid config at ~/.openclaw/openclaw.json:
+      - gateway: Invalid input
+      OpenClaw config is invalid
+      Fix: openclaw doctor --fix
+      Gateway aborted: config is invalid.
+      ```
+
+      This is a required step on this version, not optional cleanup.
+    </Warning>
+
+    Open the configuration file:
+
+    ```bash
+    nano ~/.openclaw/openclaw.json
+    ```
+
+    Locate and remove the following block:
+
+    ```json
+    "plugins": {
+      "bonjour": {
+        "enabled": false
+      }
+    }
+    ```
+
+    Save the file:
+
+    ```bash
+    Ctrl + X
+    Y
+    Enter
+    ```
+
+    Then validate before moving on:
+
+    ```bash
+    openclaw config validate
+    ```
+
+    You should see `Config valid: ~/.openclaw/openclaw.json`. If it still reports
+    invalid, check that the block above was removed completely (including its
+    surrounding comma) and didn't leave the JSON malformed.
+
+    <Note>
+      The error output above suggests `openclaw doctor --fix` as an automatic
+      remedy. That path was not exercised while validating this guide — manual
+      removal followed by `openclaw config validate` is what was actually tested.
+      If you try `openclaw doctor --fix` instead, still confirm the result with
+      `openclaw config validate` afterward.
+    </Note>
+  </Step>
+
+  <Step title="Restart the Gateway">
+    Restart OpenClaw:
+
+    ```bash
+    openclaw gateway restart
+    ```
+
+    If Restart Fails:
+
+    ```bash
+    openclaw gateway stop
+    ```
+
+    And then:
+
+    ```bash
+    openclaw gateway start
+    ```
+  </Step>
+
+  <Step title="Launch OpenClaw Chat">
+    ### Run:
+
+    ```bash
+    openclaw chat
+    ```
+
+    You should now be able to use Morpheus models through EverClaw.
+  </Step>
+</Steps>
+
+## Model Configuration
+
+By default, EverClaw configures `mor-gateway/glm-5` as your primary model, and it
+works out of the box with a funded Morpheus API key — you do not need to change it
+to get a working setup. This section is optional reference for anyone who wants to
+switch models or add one that isn't provisioned by default.
+
+### Models Available After Bootstrap
+
+Running `npm run bootstrap` (in the **Import Your Morpheus API Key** step above)
+registers a handful of models under the `mor-gateway` provider automatically:
+
+| Model | Ready to use after bootstrap? |
+|---|---|
+| `mor-gateway/glm-5` (default) | Yes |
+| `mor-gateway/kimi-k2.5` | Yes |
+| `mor-gateway/glm-4.7-flash` | Yes |
+| `mor-gateway/llama-3.3-70b` | Declared, but missing an alias entry — see below |
+| `mor-gateway/deepseek-v4-flash` | Not declared at all — needs the full addition below |
+
+### Switching the Active Model
+
+Use the CLI or the in-chat slash command to change which model is active — you do
+not need to hand-edit `openclaw.json` just to change the primary model:
 
 ```bash
-node --version
+openclaw models set mor-gateway/kimi-k2.5
 ```
 
-If Node.js is installed and up to date, proceed to Step 2.
+or, from inside an OpenClaw chat session:
 
-Need to install Node?
-
-Navigate to the official Node.js Website: Node.js — Download Node.js®
-
-Download the prebuilt Windows installer for:
-
-Windows, x64 Architecture, Latest LTS or Current Release
-
-After Installing Node.js and then verify installation using:
-
-```bash
-node --version
+```
+/model mor-gateway/kimi-k2.5
 ```
 
-
-## Step 2 – Verify Git Installation
-
-
-Open Command Prompt or PowerShell and run:
-
-```bash
-git --version
-```
-
-If Git is installed, proceed to Step 3.
-
-Need to install Git?
-
-To Install Git, navigate to official Git Website and download the latest version: Git - Install for Windows
-
-After installation, verify with:
-
-```bash
-git --version
-```
-
-
-## Step 3 – Obtain a Morpheus API Key
-
-
-Navigate to the Morpheus website: Morpheus
-
-Click: Access Inference
-
-If you have an already existing account, then Sign In with your associated details.
-
-If not, then click on the button to Sign Up at the bottom of the form and fill in the correct details as requested.
-
-After successful registration, you will be redirected to the: Inference API Admin Page
-
-Create a new API key.
-
-
-### Important: Copy and store your API key securely.
-
-
-
-### The key is only displayed once and cannot be viewed again after creation.
-
-
-
-## Step 4. Installing WSL (Ubuntu)
-
-
-Note: WSL2 is not optional for this guide specifically because of EverClaw -- EverClaw's supported platforms are macOS, Linux, and Windows via WSL2 only. Native Windows shells (PowerShell, Command Prompt, Git Bash, MSYS, Cygwin) are not supported for EverClaw, even though OpenClaw itself may run there. Complete all remaining steps inside the WSL2 Ubuntu terminal, not in PowerShell directly (PowerShell is only used here to install WSL2 itself).
-
-Open PowerShell as Administrator
-
-Run:
-
-```bash
-wsl --install
-```
-
-Wait for Windows to:
-
-Enable WSL
-
-Install the Linux kernel
-
-Configure WSL 2 as default
-
-Install Ubuntu
-
-Restart your computer when prompted.
-
-
-### Create Your Ubuntu User
-
-
-After rebooting:
-
-Open Ubuntu from the Start Menu
-
-Enter a username
-
-Enter a password
-
-Confirm the password
-
-Note:
-
-Password characters will not appear while typing. This is normal.
-
-
-### Launch Ubuntu
-
-
-Open PowerShell and enter:
-
-wsl
-
-This will open your Ubuntu environment.
-
-Update Ubuntu:
-
-Run:
-
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-
-
-## Step 5 – Install OpenClaw
-
-
-Inside Ubuntu, run:
-
-```bash
-curl -fsSL https://openclaw.ai/install.sh | bash
-```
-
-Wait for the installation to complete.
-
-
-## Step 6 – OpenClaw Onboarding
-
-
-Run:
-
-```bash
-openclaw onboard --install-daemon
-```
-
-The wizard walks you through choosing a model provider, setting an API key, and configuring the Gateway. It takes about 2 minutes.
-
-
-### For the first option select Yes
-
-
-For the Setup mode select QuickStart
-
-For the Model/auth provider select Skip for now
-
-
-### For the Default model select Keep current model
-
-
-When asked to Select channel select Skip for now as well
-
-For the Search Provider also select Skip for now
-
-Select No when asked whether to configure skills
-
-When asked to Enable Hooks, enable all of them like shown
-
-
-### When asked how you want to Hatch your agent, select Hatch later
-
-
-
-## Step 7 – Install EverClaw (Morpheus Skill)
-
-
-Inside Ubuntu, run:
-
-```bash
-curl -fsSL https://get.everclaw.xyz | bash
-```
-
-Or
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/EverClaw/EverClaw/main/packages/core/scripts/install-with-deps.sh | bash
-```
-
-Wait for the installation to complete successfully.
-
-The installer will:
-
-Verify dependencies
-
-Install EverClaw
-
-Configure OpenClaw integration
-
-Provision a temporary bootstrap inference key
-
-Configure local fallback options
-
-
-## Step 8 – Import Your Morpheus API Key
-
-
-Navigate to the EverClaw directory:
-
-```bash
-cd ~/.openclaw/workspace/skills/everclaw
-```
-
-Note: the installed directory name has been observed as both “everclaw” and “everclaw-inference” depending on install script/version. If the path above doesn't exist, check: ls ~/.openclaw/workspace/skills/ and use whichever directory is present.
-
-Note: EverClaw's installer (Step 7) may already have provisioned a bundled temporary starter key in `evcl-...` format — this is different from your own Morpheus API key (`sk...` format) from Step 3.
-
-For this step, use your `sk-...` key, not the bundled `evcl-...` one — the bundled key is a fallback, not a replacement for your own account key.
-
-Run:
-
-```bash
-npm run bootstrap -- --key sk-XXXXXXXXXXXXXXXX
-```
-
-(Replace sk-XXXXXXXXXXXXXXXX with your own Morpheus API key from Step 3.)
-
-⚠️ Known issue: newly created accounts may not have sufficient credits to complete bootstrap. If Step 8 fails with an "insufficient credits" error, this is a known platform limitation, not a setup mistake — see the troubleshooting note after Step 8 for the current workaround.
-
-If successful, EverClaw should display:
-
-
-### Morpheus API Gateway configured!
-
-
-
-## Step 9 – Edit OpenClaw Configuration
-
-
-Open the configuration file:
-
-
-### nano ~/.openclaw/openclaw.json
-
-
-Locate and remove the following section:
+Both persist across `openclaw gateway restart` and across new sessions started
+with `/new`.
+
+<Note>
+  `openclaw models list`, `openclaw models status`, and `openclaw models
+  fallbacks` are also available for inspecting current model and fallback
+  configuration from the CLI.
+</Note>
+
+### Adding a Model That Isn't Fully Provisioned
+
+To use a model bootstrap didn't fully provision (for example
+`mor-gateway/deepseek-v4-flash`, or to finish setting up
+`mor-gateway/llama-3.3-70b`), two changes to `~/.openclaw/openclaw.json` are
+needed:
+
+**1. Declare the model under `models.providers.mor-gateway.models`** (skip this
+part if it's already declared, as with `llama-3.3-70b`):
 
 ```json
-"plugins": {
-  "bonjour": {
-    "enabled": false
-  }
+{
+  "id": "deepseek-v4-flash",
+  "name": "DeepSeek V4 Flash (via Morpheus Gateway)",
+  "reasoning": false,
+  "input": ["text"],
+  "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+  "contextWindow": 131072,
+  "maxTokens": 8192
 }
 ```
 
-Save the file:
+**2. Add an alias entry under `agents.defaults.models`:**
 
-```bash
-Ctrl + X
-Y
-Enter
+```json
+"mor-gateway/deepseek-v4-flash": {
+  "alias": "DeepSeek V4 Flash (Gateway)",
+  "streaming": true
+}
 ```
 
-
-## Step 10 – Restart the Gateway
-
-
-Restart OpenClaw:
+Then validate and restart:
 
 ```bash
+openclaw config validate
 openclaw gateway restart
 ```
 
-If Restart Fails:
+Once declared, make the model active with `openclaw models set` or `/model` (see
+above) — don't hand-edit a `primary` field to switch models.
+
+If you already have a session open, start a new one so it picks up the change:
+`/new mor-gateway/deepseek-v4-flash`.
+
+## Diagnostics
+
+EverClaw ships a diagnostic script that checks your setup end-to-end:
 
 ```bash
-openclaw gateway stop
+bash ~/.openclaw/workspace/skills/everclaw/scripts/diagnose.sh
 ```
 
-And then:
+<Note>
+  If you're following this guide (API Gateway only, no Morpheus proxy-router / P2P
+  components installed), expect several checks to report as failed. That's
+  expected — the script also tests the Native/P2P path, which this guide doesn't
+  set up. A result like "10 passed, 1 warning, 5 failures" can still mean a fully
+  healthy Gateway-only install.
+</Note>
 
-```bash
-openclaw gateway start
+### Failures That Are Expected in Gateway-Only Mode
+
+Safe to ignore if you're following this guide — they indicate the Native/P2P path
+isn't installed, not that the Gateway path is broken:
+
+- `Proxy-router not responding` (port 8082)
+- `Morpheus proxy not responding` (port 8083)
+- Inference test timeout against `morpheus/kimi-k2.5` (this targets the P2P path)
+- `Auth profiles file not found` (warning)
+
+The check that actually confirms your Gateway install is working is:
+
+```
+✅ Morpheus API Gateway reachable (api.mor.org → HTTP 200)
 ```
 
+### Failures Worth Acting On
 
-## Step 11 – Launch OpenClaw Chat
+- **Models with `reasoning: true` (causes HTTP 400)** — set `"reasoning": false`
+  for the affected model under `models.providers.mor-gateway.models` in
+  `~/.openclaw/openclaw.json`.
+- **Models missing `streaming: true`** — can cause timeouts on slow connections.
+  Run `node ~/.openclaw/workspace/skills/everclaw/scripts/setup.mjs --apply`, or
+  add `"streaming": true` manually (see [Model Configuration](#model-configuration)
+  above).
 
-
-
-### Run:
-
-
-```bash
-openclaw chat
-```
-
-You should now be able to use Morpheus models through EverClaw.
-
+After making changes, restart the gateway: `openclaw gateway restart`.
 
 ## Troubleshooting
 
+### Insufficient Credits During Bootstrap
 
+<Warning>
+  This has not been re-confirmed on a genuinely fresh, unfunded account — the most
+  recent validation pass used a pre-funded account, so this failure mode itself
+  was not reproduced or re-tested. The workaround below is carried over from
+  earlier reports as a best-effort suggestion, not a validated fix.
+</Warning>
 
-### Insufficient credits during Step 8
+If `npm run bootstrap -- --key sk-...` fails with an "insufficient credits" error:
 
+**Suggested workaround (unverified):** skip `npm run bootstrap` and instead add
+your Morpheus API key directly under `models.providers.mor-gateway.apiKey` in
+`~/.openclaw/openclaw.json`, then continue to the **Remove the Bonjour Plugin
+Block** step.
 
-Known issue with newly created accounts.
+If this doesn't resolve it, treat it as an account/credits issue on the Morpheus
+side rather than a setup mistake.
 
-Workaround:
+### EverClaw shows "needs setup" / "visible to model: no" even after being enabled
 
-skip `npm run bootstrap` entirely.
-
-Instead, manually add your Morpheus API key directly into `~/.openclaw/openclaw.json`,
-
-Then continue to Step 9.
-
-Model too expensive for the hosted API gateway
-
-The hosted gateway currently supports only a subset of models, and capacity is actively
-
-expanding — this can occur even with a funded key.
-
-Workaround:
-
-This requires two changes in ~/.openclaw/openclaw.json: (1) add the model as a new entry under models.providers.mor-gateway.models (it may not be declared there by default), and (2) set "primary" to the provider-qualified name, e.g. "mor-gateway/deepseek-v4-flash" -- not the bare model name, which gets misinterpreted as a different provider and can trigger a fallback to a local model.
-
-Then restart the gateway (Step 10).
-
-After changing the model, also start a clean session: /new mor-gateway/`<model-name>` (e.g. /new mor-gateway/deepseek-v4-flash). Restarting the gateway does not clear an already-open session's model selection -- an existing session can keep using its previous fallback model even after the config is corrected.
-
-
-### EverClaw shows “needs setup” / “visible to model: no” even after being enabled
-
-
-Some installed versions of EverClaw's SKILL.md declare optional environment variables as objects, but the running OpenClaw version may expect requires.env as a plain string array. This mismatch can show as: environment: ✗ [object object], ✗ [object object]. Fix: open the skill's SKILL.md (in the everclaw/ or everclaw-inference/ directory, see the note above), back it up, remove the env: block under requires: while keeping bins:, then run: openclaw gateway restart && openclaw skills info everclaw. Expect ready and visible to model: yes when fixed.
-
+Some installed versions of EverClaw's SKILL.md declare optional environment variables as objects, but the running OpenClaw version may expect requires.env as a plain string array. This mismatch can show as: environment: ✗ [object object], ✗ [object object]. Fix: open the skill's SKILL.md (in the `everclaw` directory), back it up, remove the env: block under requires: while keeping bins:, then run: openclaw gateway restart && openclaw skills info everclaw. Expect ready and visible to model: yes when fixed.
 
 ### Asking the model to use EverClaw doesn't seem to do anything
 
-
 EverClaw is not a /everclaw slash command. It installs a permanent inference connection (used automatically for ordinary chat, no invocation needed) and separately ships a diagnostic/setup skill that only activates for matching natural-language requests, e.g. "use the everclaw skill to perform a read-only diagnosis of my morpheus setup." Verify the skill itself is working with: openclaw skills info everclaw (look for ready and visible to model: yes) rather than relying on the model's own claims.
-
-Both workarounds were confirmed to result in successful authentication and
-
-working inference.

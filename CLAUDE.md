@@ -62,9 +62,12 @@ errors before wasting time debugging a broken preview.
 
 ## Content decisions made deliberately — don't silently "fix" these back
 
-- **EverClaw's installed directory is noted as possibly `everclaw` OR
-  `everclaw-inference`** depending on install script/version — this is intentional
-  ambiguity pending verification, not an unresolved bug to pick one side of.
+- **EverClaw's installed directory is confirmed `everclaw`**, not
+  `everclaw-inference` — settled by the fresh-install test report
+  (`docs/testing/OpenClaw_EverClaw_Fresh_Install_Test_Report.md`, §3.2) on OpenClaw
+  `2026.7.1-2`. The API Gateway guides state this as confirmed, with a fallback
+  `ls` check in case a future version differs — don't revert to presenting it as
+  an open ambiguity.
 - **The stake-lock/claim behavior** (Native path guides) is real, current platform
   behavior (~24h hold + manual `withdrawUserStakes` call) confirmed via direct
   testing and cross-referenced against upstream issue #827/PR #832 — not a
@@ -72,10 +75,30 @@ errors before wasting time debugging a broken preview.
 - **`morctl` is the recommended CLI**, not the official `mor-cli` (has confirmed,
   unresolved bugs on Windows — issue #792). Any new content should follow this,
   not reintroduce `mor-cli` as a primary recommendation.
-- **The two-part model-configuration fix** in the API Gateway guides (declare the
-  model under `mor-gateway`'s list AND use the provider-qualified `primary` name)
-  is deliberately more thorough than earlier drafts — don't collapse it back to a
-  single-step instruction.
+- **Model configuration in the API Gateway guides is now two separate
+  procedures, not one "declare + set primary" fix** — corrected per the same test
+  report (§6.1, §6.2). (1) Switching the *active* model among already-provisioned
+  models no longer requires hand-editing `openclaw.json` at all — `openclaw
+  models set <model>` or the TUI `/model <model>` both work and persist across
+  restarts. (2) *Provisioning* a model that isn't fully set up by default (e.g.
+  `deepseek-v4-flash`) still requires two JSON changes — declare it under
+  `models.providers.mor-gateway.models`, and add an alias entry under
+  `agents.defaults.models` — but no longer involves hand-editing a `primary`
+  field. Don't collapse either procedure to fewer steps, and don't conflate the
+  two (provisioning vs. activating are different operations).
+- **The default model (`mor-gateway/glm-5`) works out of the box** with a funded
+  key — the previously-documented "model too expensive for the hosted API
+  gateway" failure did not reproduce on re-test (report §6.3). Don't reintroduce
+  advice to avoid or switch away from the default for cost reasons.
+- **The `gateway.plugins.bonjour` config block is a required removal, not
+  optional cleanup** — on OpenClaw `2026.7.1-2` it's a blocking schema-validation
+  failure that prevents `openclaw gateway start`/`restart` from succeeding at all
+  (report §5). The guides flag this with a `<Warning>`; don't demote it back to a
+  routine aside.
+- **Fresh-account "insufficient credits" during bootstrap remains unresolved**,
+  not fixed — the fresh-install test report used a pre-funded account (§9), so
+  the existing workaround is carried over as an unverified suggestion. Don't
+  present it as a confirmed fix.
 
 ## Workflow going forward
 

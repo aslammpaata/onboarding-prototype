@@ -25,119 +25,113 @@ other people's computers around the world, instead of one company's servers.
 **What you'll need:** Windows 10/11, an internet connection (skip this entirely with the
 free offline local model, see Step 4's tip), and about 10 minutes.
 
+---
+
+## Security Considerations
+
 > 🔐 This app creates a real crypto wallet. You'll get a clear warning at the exact
 > moment this matters (Step 3).
 
 ---
 
-## Step 1: Download & Install
+## Walkthrough
 
-1. Go to the [Releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
-   and download `win-x64-morpheus-app-<version>.exe`.
+<Steps>
+  <Step title="Download & Install">
+    1. Go to the [Releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
+       and download `win-x64-morpheus-app-<version>.exe`.
 
-2. Run it — Windows may show a SmartScreen warning; **More info → Run anyway**.
+    2. Run it — Windows may show a SmartScreen warning; **More info → Run anyway**.
 
-✅ Installed.
+    ✅ Installed.
+  </Step>
 
----
+  <Step title="First Launch">
+    Open Morpheus from the Start menu.
+  </Step>
 
-## Step 2: First Launch
+  <Step title="Set Up Your Wallet">
+    1. Set a password.
 
-Open Morpheus from the Start menu.
+    2. **Create** (new user) or **Recover** (existing seed phrase).
 
----
+    3. If creating: you'll see a **seed phrase**.
 
-## Step 3: Set Up Your Wallet
+       <Frame>
+         <img src="/native-path/images/desktop-app-01-seed-phrase.png" alt="Morpheus Desktop App seed phrase screen shown during wallet creation" />
+       </Frame>
 
-1. Set a password.
+       🔴 Heaviest annotation in the guide: *"Never share this. Never screenshot and post it. Write it down on paper."*
 
-2. **Create** (new user) or **Recover** (existing seed phrase).
+    ✅ Wallet exists, currently empty — expected.
+  </Step>
 
-3. If creating: you'll see a **seed phrase**.
+  <Step title="Fund Your Wallet">
+    | | For | Think of it as |
+    |---|---|---|
+    | ETH (Base) | Gas | The toll for using the road |
+    | MOR | Using the network | What you're here for |
 
-   <Frame>
-     <img src="/native-path/images/desktop-app-01-seed-phrase.png" alt="Morpheus Desktop App seed phrase screen shown during wallet creation" />
-   </Frame>
+    1. Wallet tab shows `0 MOR / 0 ETH`.
 
-   🔴 Heaviest annotation in the guide: *"Never share this. Never screenshot and post it. Write it down on paper."*
+    2. Send MOR + ETH, or use Receive's QR code.
 
-✅ Wallet exists, currently empty — expected.
+    ✅ Funded.
 
----
+    > 💡 **Free path, no funding needed:** in Chat, pick the bundled **local model** — runs
+    > entirely on your machine.
+  </Step>
 
-## Step 4: Fund Your Wallet
+  <Step title="Choose a Model">
+    Fee and Stake shown here are the model's own listing bond — not what you'll pay to use it.
+  </Step>
 
-| | For | Think of it as |
-|---|---|---|
-| ETH (Base) | Gas | The toll for using the road |
-| MOR | Using the network | What you're here for |
+  <Step title="Open a Session (Staking, Explained)">
+    A **stake** is a refundable deposit, not a payment — like a hotel deposit.
 
-1. Wallet tab shows `0 MOR / 0 ETH`.
+    1. Chat → Change Model → pick one.
 
-2. Send MOR + ETH, or use Receive's QR code.
+    2. Open Session → confirm.
 
-✅ Funded.
+    3. Wallet tab shows available MOR dropped, Staked Balance up.
 
-> 💡 **Free path, no funding needed:** in Chat, pick the bundled **local model** — runs
-> entirely on your machine.
+       <Frame>
+         <img src="/native-path/images/desktop-app-02-wallet-page-right-after-staking.png" alt="Morpheus Desktop App wallet tab immediately after staking, showing available MOR dropped and Staked Balance increased" />
+       </Frame>
 
----
+       🔴 *"This is expected — your MOR is locked, not spent."*
 
-## Step 5: Choose a Model
+    4. Session header shows ID, timer, small cost figure.
 
-Fee and Stake shown here are the model's own listing bond — not what you'll pay to use it.
+       <Frame>
+         <img src="/native-path/images/desktop-app-03-session-header.png" alt="Morpheus Desktop App session header showing session ID, countdown timer, and session cost, distinct from the staked amount" />
+       </Frame>
 
----
+    ✅ Session open.
+  </Step>
 
-## Step 6: Open a Session (Staking, Explained)
+  <Step title="Chat & Run Inference">
+    ✅ You've used decentralized AI.
+  </Step>
 
-A **stake** is a refundable deposit, not a payment — like a hotel deposit.
+  <Step title="What Happens When You're Done">
+    ⚠️ **Updated — this behavior recently changed and is more involved than it used to be.**
 
-1. Chat → Change Model → pick one.
+    - **Let the session run out.** When the timer hits zero, your node auto-submits the
+      close transaction after ~1 minute — but this **only settles the session cost**, not
+      your full stake.
+    - **Your stake goes into a hold period (~24 hours)** before it's claimable. This is a
+      recently-enforced network rule, not a bug in your setup.
+    - **Recovering it currently requires a manual step**: after ~24 hours, someone needs to
+      call `withdrawUserStakes` directly on the Diamond contract — via
+      [Basescan's Write tab](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a#writeContract),
+      connecting the same wallet, entering your address and a small iteration count (e.g.
+      `1`–`3`). The app itself does not do this for you yet.
+      ([Tracking issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827).)
 
-2. Open Session → confirm.
-
-3. Wallet tab shows available MOR dropped, Staked Balance up.
-
-   <Frame>
-     <img src="/native-path/images/desktop-app-02-wallet-page-right-after-staking.png" alt="Morpheus Desktop App wallet tab immediately after staking, showing available MOR dropped and Staked Balance increased" />
-   </Frame>
-
-   🔴 *"This is expected — your MOR is locked, not spent."*
-
-4. Session header shows ID, timer, small cost figure.
-
-   <Frame>
-     <img src="/native-path/images/desktop-app-03-session-header.png" alt="Morpheus Desktop App session header showing session ID, countdown timer, and session cost, distinct from the staked amount" />
-   </Frame>
-
-✅ Session open.
-
----
-
-## Step 7: Chat & Run Inference
-
-✅ You've used decentralized AI.
-
----
-
-## Step 8: What Happens When You're Done
-
-⚠️ **Updated — this behavior recently changed and is more involved than it used to be.**
-
-- **Let the session run out.** When the timer hits zero, your node auto-submits the
-  close transaction after ~1 minute — but this **only settles the session cost**, not
-  your full stake.
-- **Your stake goes into a hold period (~24 hours)** before it's claimable. This is a
-  recently-enforced network rule, not a bug in your setup.
-- **Recovering it currently requires a manual step**: after ~24 hours, someone needs to
-  call `withdrawUserStakes` directly on the Diamond contract — via
-  [Basescan's Write tab](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a#writeContract),
-  connecting the same wallet, entering your address and a small iteration count (e.g.
-  `1`–`3`). The app itself does not do this for you yet.
-  ([Tracking issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827).)
-
-✅ You understand the full loop, including the part that currently needs a manual step.
+    ✅ You understand the full loop, including the part that currently needs a manual step.
+  </Step>
+</Steps>
 
 ---
 

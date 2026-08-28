@@ -49,7 +49,7 @@ Cross-compile: `GOOS=windows GOARCH=amd64 go build -o morctl.exe .` ·
 `GOOS=darwin GOARCH=arm64 go build -o morctl .` (Apple Silicon) ·
 `GOOS=darwin GOARCH=amd64 go build -o morctl .` (Intel)
 
-**📸 Capture 1 — silent successful build**, annotate: *"No output = it worked."*
+*No output means it worked.*
 
 ✅ You have a binary.
 
@@ -62,8 +62,6 @@ export COOKIE_FILE_PATH="/path/to/.cookie"    # macOS/Linux
 $env:COOKIE_FILE_PATH = "C:\path\to\.cookie"   # Windows
 ```
 
-**📸 Capture 2 — `echo $COOKIE_FILE_PATH` confirming it's set.**
-
 ✅ Credentials in place.
 
 ---
@@ -74,8 +72,8 @@ $env:COOKIE_FILE_PATH = "C:\path\to\.cookie"   # Windows
 ./morctl
 ```
 
-**📸 Capture 3 — successful output**, box the three key lines (router reachable,
-wallet balance, "Preflight OK").
+A successful run shows three key lines: router reachable, wallet balance, and
+"Preflight OK".
 
 ✅ Ready for Step 4.
 
@@ -102,8 +100,6 @@ This is the single most important capture in the guide.
 ```bash
 ./morctl --dev --interactive
 ```
-
-**📸 Capture 5 — a short exchange showing memory working within the session.**
 
 Type `exit`/`quit` to stop chatting locally — the session keeps running in the
 background.

@@ -76,8 +76,6 @@ and Python 3.10+ if running your own model server.
 > assumed ~0.01 ETH was sufficient. Fund with at least **0.1 ETH** until this is
 > confirmed against a live node, rather than trusting either number blindly.
 
-**📸 Capture 1 — MetaMask showing nonzero ETH and MOR, on the Base network specifically.**
-
 ✅ Wallet funded.
 
 ---
@@ -107,8 +105,6 @@ manager (systemd) over `go run` in an interactive terminal — see Step 8.
 > ⚠️ Release filenames change between versions — check the
 > [releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
 > rather than trusting an old link.
-
-**📸 Capture 2 — successful extract/clone + build, no errors.**
 
 ✅ You have a router, one way or another.
 
@@ -168,7 +164,7 @@ python -m vllm.entrypoints.openai.api_server \
 > Linux/WSL). Confirm with `which python` — it should point *inside* your venv, not
 > `/usr/bin/python3`.
 
-**📸 Capture 3 — a direct test against your model server, before connecting the router:**
+Run a direct test against your model server, before connecting the router:
 ```bash
 curl -s http://localhost:8000/v1/models | python3 -m json.tool
 ```
@@ -179,8 +175,8 @@ curl -s http://localhost:8000/v1/chat/completions \
   -d '{"model":"<SERVING_NAME>","messages":[{"role":"user","content":"Reply with exactly: PROVIDER ONLINE"}],"max_tokens":20}' \
   | python3 -m json.tool
 ```
-Annotate: *"Confirm a real completion works here — `/v1/models` alone isn't proof.
-If this fails, don't troubleshoot Morpheus yet."*
+Confirm a real completion works here — `/v1/models` alone isn't proof. If this fails,
+don't troubleshoot Morpheus yet.
 
 ✅ Your model server answers on its own.
 
@@ -233,8 +229,6 @@ security add-generic-password -a "$(whoami)" -s "morpheus-wallet-key" -w "YOUR_P
 > router falls back to reading `WALLET_PRIVATE_KEY` from the environment each start.
 > This still works, it's just less convenient — you'll need to `export
 > WALLET_PRIVATE_KEY=...` before every start rather than it persisting automatically.
-
-**📸 Capture 4 — the `.env` file's contents, with the blank `WALLET_PRIVATE_KEY=` line.**
 
 ✅ Router configured, no plaintext key on disk.
 
@@ -386,8 +380,8 @@ curl -s -u "$(cat ~/morpheus/.cookie)" http://localhost:8082/v1/models | python3
 Don't fix these by blindly restarting everything — identify which layer the state
 actually points to.
 
-**📸 Capture 7 — the router's startup log**, boxing wallet loaded, listening on 3333,
-no config errors.
+A healthy startup log shows the wallet loaded, listening on 3333, with no config
+errors.
 
 ✅ Running, healthy, and will survive a restart.
 

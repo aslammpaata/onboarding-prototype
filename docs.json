@@ -1,14 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Morpheus Onboarding (Prototype)",
+  "name": "MorpheusGuide",
   "colors": {
     "primary": "#16A34A",
-    "light": "#4ADE80",
+    "light": "#07C983",
     "dark": "#15803D"
-  },
-  "fonts": {
-    "family": "Inter"
   },
   "navigation": {
     "tabs": [
@@ -57,6 +54,16 @@
     "links": [
       { "label": "Technical Docs (nodedocs)", "href": "https://nodedocs.mor.org" },
       { "label": "GitHub", "href": "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node" }
-    ]
+    ],
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node"
+    }
+  },
+  "contextual": {
+    "options": ["copy", "view", "mcp", "cursor", "chatgpt", "claude", "perplexity", "vscode"]
+  },
+  "seo": {
+    "indexing": "navigable"
   }
 }

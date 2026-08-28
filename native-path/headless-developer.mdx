@@ -58,9 +58,6 @@ Invoke-WebRequest "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases
 > for the current version — filenames change between releases. Avoid any `-test`-suffixed
 > release unless you specifically want testnet.
 
-**📸 Capture 1 — the download completing and the binary present in the folder** (`ls` /
-`dir`). Annotate: *"Confirm no `-test` in the filename — that's a testnet build."*
-
 ✅ You have a router binary.
 
 ---
@@ -103,9 +100,6 @@ PROXY_STORAGE_PATH=./data/
 
 Note `WALLET_PRIVATE_KEY` is left **blank** — you'll inject it live in Step 3, not store
 it in this file.
-
-**📸 Capture 2 — the `.env` file contents printed** (`cat .env` / `type .env`), with the
-blank key line visible.
 
 ✅ Router configured.
 
@@ -176,11 +170,11 @@ pattern from Step 3.)
 Get a real `<MODEL_ID>` from `GET /blockchain/models`, or from the Desktop App's Models
 tab.
 
-**📸 Capture 5 — the response**, boxing the `sessionID` field:
+The response includes a `sessionID` field:
 ```json
 {"sessionID":"0xa3e0ac1a374208b4420d84af96a2f7b27b34d5bbe742be9f8c656"}
 ```
-Annotate: *"Copy this — you need it for every inference call in this session."*
+Copy this — you need it for every inference call in this session.
 
 ✅ Session open, MOR staked.
 
@@ -196,8 +190,7 @@ curl -s -X POST 'http://localhost:8082/v1/chat/completions' \
   -d '{"messages": [{"role": "user", "content": "Hello. Tell me about AI."}]}'
 ```
 
-**📸 Capture 6 — the model's reply in the JSON response.** Tip: append
-`| python3 -m json.tool` for readable output.
+Tip: append `| python3 -m json.tool` for readable output.
 
 ✅ You've run raw inference with no client library at all.
 
@@ -230,8 +223,6 @@ curl -s -X POST 'http://localhost:8082/v1/chat/completions' \
 Requires `PROXY_STORE_CHAT_CONTEXT=true` and `PROXY_FORWARD_CHAT_CONTEXT=true` in your
 `.env`. History for a given `chat_id` is viewable locally at
 `./data/chats/<CHAT_ID>.json`.
-
-**📸 Capture 7 — the second response correctly recalling "Alex" from the first message.**
 
 ✅ Genuine multi-turn conversation via the raw API.
 

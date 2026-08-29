@@ -22,15 +22,20 @@ funding → Pick a model → Open a session → Chat → Understand what happens
 **What Morpheus is, in one sentence:** it's a way to chat with AI models that run on
 other people's computers around the world, instead of one company's servers.
 
-**What you'll need:** Windows 10/11, an internet connection (skip this entirely with the
-free offline local model, see Step 4's tip), and about 10 minutes.
+**What you'll need:**
+
+- Windows 10/11
+- An internet connection (skip this entirely with the free offline local model, see Step 4's tip)
+- About 10 minutes
 
 ---
 
 ## Security Considerations
 
-> 🔐 This app creates a real crypto wallet. You'll get a clear warning at the exact
-> moment this matters (Step 3).
+<Warning>
+  This app creates a real crypto wallet. You'll get a clear warning at the exact
+  moment this matters (Step 3).
+</Warning>
 
 ---
 
@@ -43,7 +48,7 @@ free offline local model, see Step 4's tip), and about 10 minutes.
 
     2. Run it — Windows may show a SmartScreen warning; **More info → Run anyway**.
 
-    ✅ Installed.
+    **Installed.**
   </Step>
 
   <Step title="First Launch">
@@ -61,9 +66,11 @@ free offline local model, see Step 4's tip), and about 10 minutes.
          <img src="/native-path/images/desktop-app-01-seed-phrase.png" alt="Morpheus Desktop App seed phrase screen shown during wallet creation" />
        </Frame>
 
-       🔴 Heaviest annotation in the guide: *"Never share this. Never screenshot and post it. Write it down on paper."*
+       <Warning>
+         Never share this. Never screenshot and post it. Write it down on paper.
+       </Warning>
 
-    ✅ Wallet exists, currently empty — expected.
+    **Wallet exists, currently empty — expected.**
   </Step>
 
   <Step title="Fund Your Wallet">
@@ -76,10 +83,12 @@ free offline local model, see Step 4's tip), and about 10 minutes.
 
     2. Send MOR + ETH, or use Receive's QR code.
 
-    ✅ Funded.
+    **Funded.**
 
-    > 💡 **Free path, no funding needed:** in Chat, pick the bundled **local model** — runs
-    > entirely on your machine.
+    <Tip>
+      **Free path, no funding needed:** in Chat, pick the bundled **local model** —
+      runs entirely on your machine.
+    </Tip>
   </Step>
 
   <Step title="Choose a Model">
@@ -99,7 +108,9 @@ free offline local model, see Step 4's tip), and about 10 minutes.
          <img src="/native-path/images/desktop-app-02-wallet-page-right-after-staking.png" alt="Morpheus Desktop App wallet tab immediately after staking, showing available MOR dropped and Staked Balance increased" />
        </Frame>
 
-       🔴 *"This is expected — your MOR is locked, not spent."*
+       <Note>
+         This is expected — your MOR is locked, not spent.
+       </Note>
 
     4. Session header shows ID, timer, small cost figure.
 
@@ -107,15 +118,17 @@ free offline local model, see Step 4's tip), and about 10 minutes.
          <img src="/native-path/images/desktop-app-03-session-header.png" alt="Morpheus Desktop App session header showing session ID, countdown timer, and session cost, distinct from the staked amount" />
        </Frame>
 
-    ✅ Session open.
+    **Session open.**
   </Step>
 
   <Step title="Chat & Run Inference">
-    ✅ You've used decentralized AI.
+    **You've used decentralized AI.**
   </Step>
 
   <Step title="What Happens When You're Done">
-    ⚠️ **Updated — this behavior recently changed and is more involved than it used to be.**
+    <Warning>
+      **Updated** — this behavior recently changed and is more involved than it used to be.
+    </Warning>
 
     - **Let the session run out.** When the timer hits zero, your node auto-submits the
       close transaction after ~1 minute — but this **only settles the session cost**, not
@@ -123,13 +136,14 @@ free offline local model, see Step 4's tip), and about 10 minutes.
     - **Your stake goes into a hold period (~24 hours)** before it's claimable. This is a
       recently-enforced network rule, not a bug in your setup.
     - **Recovering it currently requires a manual step**: after ~24 hours, someone needs to
-      call `withdrawUserStakes` directly on the Diamond contract — via
+      call `withdrawUserStakes` directly on the [Diamond contract](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a)
+      — via
       [Basescan's Write tab](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a#writeContract),
       connecting the same wallet, entering your address and a small iteration count (e.g.
       `1`–`3`). The app itself does not do this for you yet.
       ([Tracking issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827).)
 
-    ✅ You understand the full loop, including the part that currently needs a manual step.
+    **You understand the full loop, including the part that currently needs a manual step.**
   </Step>
 </Steps>
 

@@ -4,6 +4,12 @@ title: "API Gateway: Windows (WSL2) Setup"
 
 Morpheus Skill Installation Guide (Windows)
 
+**What you'll do:** Verify Node.js & Git → Get a Morpheus API key → Install WSL2 (Ubuntu) → Install OpenClaw → Install EverClaw → Import your API key → Remove the Bonjour plugin block → Restart the Gateway → Chat.
+
+**Time:** About 20–30 minutes (the WSL2 install adds a restart cycle).
+
+---
+
 ## Before You Start
 
 **What this is, in one sentence:** installing OpenClaw (an AI agent CLI) and EverClaw
@@ -82,13 +88,17 @@ WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw insid
 
     Download the prebuilt Windows installer for:
 
-    Windows, x64 Architecture, Latest LTS or Current Release
+    - Windows
+    - x64 Architecture
+    - Latest LTS or Current Release
 
-    After Installing Node.js and then verify installation using:
+    After installing Node.js, verify installation using:
 
     ```bash
     node --version
     ```
+
+    **Node.js is ready.**
   </Step>
 
   <Step title="Verify Git Installation">
@@ -100,41 +110,41 @@ WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw insid
 
     If Git is installed, continue to the next step.
 
-    Need to install Git?
-
-    To Install Git, navigate to official Git Website and download the latest version: Git - Install for Windows
+    Need to install Git? Download the latest version from the [official Git website](https://git-scm.com/download/win).
 
     After installation, verify with:
 
     ```bash
     git --version
     ```
+
+    **Git is ready.**
   </Step>
 
   <Step title="Obtain a Morpheus API Key">
-    Navigate to the Morpheus website: Morpheus
+    Navigate to the [Morpheus website](https://mor.org).
 
-    Click: Access Inference
+    Click [Access Inference](https://app.mor.org).
 
-    If you have an already existing account, then Sign In with your associated details.
+    If you have an existing account, Sign In with your associated details. If not, click Sign Up at the bottom of the form and fill in the requested details.
 
-    If not, then click on the button to Sign Up at the bottom of the form and fill in the correct details as requested.
+    After successful registration, you'll be redirected to the Inference API Admin Page. Create a new API key.
 
-    After successful registration, you will be redirected to the: Inference API Admin Page
-
-    Create a new API key.
-
-    Important: Copy and store your API key securely.
-
-    The key is only displayed once and cannot be viewed again after creation.
+    **Important:** copy and store your API key securely — it's only displayed once and cannot be viewed again after creation.
   </Step>
 
   <Step title="Installing WSL (Ubuntu)">
-    Note: WSL2 is not optional for this guide specifically because of EverClaw -- EverClaw's supported platforms are macOS, Linux, and Windows via WSL2 only. Native Windows shells (PowerShell, Command Prompt, Git Bash, MSYS, Cygwin) are not supported for EverClaw, even though OpenClaw itself may run there. Complete all remaining steps inside the WSL2 Ubuntu terminal, not in PowerShell directly (PowerShell is only used here to install WSL2 itself).
+    <Warning>
+      WSL2 is required for this guide — EverClaw only supports macOS, Linux, and
+      Windows via WSL2. Native Windows shells (PowerShell, Command Prompt, Git
+      Bash, MSYS, Cygwin) are not supported, even though OpenClaw itself may run
+      there.
 
-    Open PowerShell as Administrator
+      Complete all remaining steps inside the WSL2 Ubuntu terminal, not
+      PowerShell — PowerShell is only used here to install WSL2 itself.
+    </Warning>
 
-    Run:
+    Open PowerShell as Administrator and run:
 
     ```bash
     wsl --install
@@ -142,47 +152,36 @@ WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw insid
 
     Wait for Windows to:
 
-    Enable WSL
-
-    Install the Linux kernel
-
-    Configure WSL 2 as default
-
-    Install Ubuntu
+    - Enable WSL
+    - Install the Linux kernel
+    - Configure WSL 2 as default
+    - Install Ubuntu
 
     Restart your computer when prompted.
 
     ### Create Your Ubuntu User
 
-    After rebooting:
+    After rebooting, open Ubuntu from the Start Menu and:
 
-    Open Ubuntu from the Start Menu
+    - Enter a username
+    - Enter a password
+    - Confirm the password
 
-    Enter a username
-
-    Enter a password
-
-    Confirm the password
-
-    Note:
-
-    Password characters will not appear while typing. This is normal.
+    <Note>
+      Password characters won't appear while typing — this is normal.
+    </Note>
 
     ### Launch Ubuntu
 
-    Open PowerShell and enter:
-
-    wsl
-
-    This will open your Ubuntu environment.
+    Open PowerShell and enter `wsl` to open your Ubuntu environment.
 
     Update Ubuntu:
-
-    Run:
 
     ```bash
     sudo apt update && sudo apt upgrade -y
     ```
+
+    **WSL2 Ubuntu is installed and up to date.**
   </Step>
 
   <Step title="Install OpenClaw">
@@ -193,6 +192,8 @@ WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw insid
     ```
 
     Wait for the installation to complete.
+
+    **OpenClaw is installed.**
   </Step>
 
   <Step title="OpenClaw Onboarding">
@@ -213,6 +214,8 @@ WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw insid
     - **Configure skills:** select No
     - **Enable Hooks:** enable all of them like shown
     - **Hatch your agent:** select Hatch later
+
+    **Onboarding wizard complete.**
   </Step>
 
   <Step title="Install EverClaw (Morpheus Skill)">
@@ -228,19 +231,15 @@ WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw insid
     curl -fsSL https://raw.githubusercontent.com/EverClaw/EverClaw/main/packages/core/scripts/install-with-deps.sh | bash
     ```
 
-    Wait for the installation to complete successfully.
+    Wait for the installation to complete successfully. The installer will:
 
-    The installer will:
+    - Verify dependencies
+    - Install EverClaw
+    - Configure OpenClaw integration
+    - Provision a temporary bootstrap inference key
+    - Configure local fallback options
 
-    Verify dependencies
-
-    Install EverClaw
-
-    Configure OpenClaw integration
-
-    Provision a temporary bootstrap inference key
-
-    Configure local fallback options
+    **EverClaw is installed.**
   </Step>
 
   <Step title="Import Your Morpheus API Key">
@@ -250,17 +249,20 @@ WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw insid
     cd ~/.openclaw/workspace/skills/everclaw
     ```
 
-    Note: the installed directory is confirmed `everclaw` (verified via fresh-install testing on OpenClaw 2026.7.1-2). If it's missing, run:
+    <Note>
+      The installed directory is confirmed `everclaw` (verified via fresh-install
+      testing on OpenClaw 2026.7.1-2). If it's missing, run
+      `ls ~/.openclaw/workspace/skills/` and use whichever directory is present.
+    </Note>
 
-    ```bash
-    ls ~/.openclaw/workspace/skills/
-    ```
-
-    and use whichever directory is present.
-
-    Note: EverClaw's installer (previous step) may already have provisioned a bundled temporary starter key in `evcl-...` format — this is different from your own Morpheus API key (`sk...` format) from the Obtain a Morpheus API Key step above.
-
-    For this step, use your `sk-...` key, not the bundled `evcl-...` one — the bundled key is a fallback, not a replacement for your own account key.
+    <Note>
+      EverClaw's installer (previous step) may already have provisioned a bundled
+      temporary starter key in `evcl-...` format — this is different from your
+      own Morpheus API key (`sk...` format) from the Obtain a Morpheus API Key
+      step above. For this step, use your `sk-...` key, not the bundled
+      `evcl-...` one — the bundled key is a fallback, not a replacement for your
+      own account key.
+    </Note>
 
     Run:
 
@@ -279,7 +281,9 @@ WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw insid
 
     If successful, EverClaw should display:
 
-    ### Morpheus API Gateway configured!
+    ```
+    Morpheus API Gateway configured!
+    ```
   </Step>
 
   <Step title="Remove the Bonjour Plugin Block (Required)">
@@ -349,7 +353,7 @@ WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw insid
     openclaw gateway restart
     ```
 
-    If Restart Fails:
+    If restart fails:
 
     ```bash
     openclaw gateway stop
@@ -360,16 +364,24 @@ WSL2 provides an extra layer of isolation by running OpenClaw and EverClaw insid
     ```bash
     openclaw gateway start
     ```
+
+    **Gateway restarted successfully.**
   </Step>
 
   <Step title="Launch OpenClaw Chat">
-    ### Run:
+    Run:
 
     ```bash
     openclaw chat
     ```
 
-    You should now be able to use Morpheus models through EverClaw.
+    Send a test message and confirm you get a response.
+
+    **You should now be able to use Morpheus models through EverClaw.**
+
+    <Frame>
+      <img src="/api-gateway/images/api-gateway-windows-guide-01-first-response.png" alt="OpenClaw chat session showing a successful first response from a Morpheus-hosted model through the API Gateway" />
+    </Frame>
   </Step>
 </Steps>
 
@@ -528,8 +540,21 @@ side rather than a setup mistake.
 
 ### EverClaw shows "needs setup" / "visible to model: no" even after being enabled
 
-Some installed versions of EverClaw's SKILL.md declare optional environment variables as objects, but the running OpenClaw version may expect requires.env as a plain string array. This mismatch can show as: environment: ✗ [object object], ✗ [object object]. Fix: open the skill's SKILL.md (in the `everclaw` directory), back it up, remove the env: block under requires: while keeping bins:, then run: openclaw gateway restart && openclaw skills info everclaw. Expect ready and visible to model: yes when fixed.
+Some installed versions of EverClaw's SKILL.md declare optional environment variables as objects, but the running OpenClaw version may expect `requires.env` as a plain string array. This mismatch can show as:
+
+```
+environment: ✗ [object object], ✗ [object object]
+```
+
+**Fix:**
+1. Open the skill's `SKILL.md` (in the `everclaw` directory) and back it up.
+2. Remove the `env:` block under `requires:`, keeping `bins:`.
+3. Run `openclaw gateway restart && openclaw skills info everclaw`.
+
+Expect `ready` and `visible to model: yes` when fixed.
 
 ### Asking the model to use EverClaw doesn't seem to do anything
 
-EverClaw is not a /everclaw slash command. It installs a permanent inference connection (used automatically for ordinary chat, no invocation needed) and separately ships a diagnostic/setup skill that only activates for matching natural-language requests, e.g. "use the everclaw skill to perform a read-only diagnosis of my morpheus setup." Verify the skill itself is working with: openclaw skills info everclaw (look for ready and visible to model: yes) rather than relying on the model's own claims.
+EverClaw is not a `/everclaw` slash command. It installs a permanent inference connection used automatically for ordinary chat — no invocation needed — and separately ships a diagnostic/setup skill that only activates for matching natural-language requests, e.g. "use the everclaw skill to perform a read-only diagnosis of my morpheus setup."
+
+**To verify the skill itself is working:** run `openclaw skills info everclaw` and look for `ready` and `visible to model: yes`, rather than relying on the model's own claims.

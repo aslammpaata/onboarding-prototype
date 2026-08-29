@@ -2,6 +2,10 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "MorpheusGuide",
+  "logo": {
+    "light": "/logo/morpheus-guide-logo-light.jpg",
+    "dark": "/logo/morpheus-guide-logo-dark.jpg"
+  },
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",

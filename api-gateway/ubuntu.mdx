@@ -4,6 +4,12 @@ title: "API Gateway: Ubuntu / Oracle VirtualBox Setup"
 
 Morpheus Installation Guide (Oracle VirtualBox-Ubuntu)
 
+**What you'll do:** Download Ubuntu → Install VirtualBox → Get a Morpheus API key → Create & install the VM → Install OpenClaw → Install EverClaw → Import your API key → Remove the Bonjour plugin block → Restart the Gateway → Chat.
+
+**Time:** About 30–45 minutes (VM creation and the Ubuntu install take the bulk of it).
+
+---
+
 ## Before You Start
 
 **What this is, in one sentence:** installing OpenClaw (an AI agent CLI) and EverClaw
@@ -73,123 +79,95 @@ Running OpenClaw and related tools inside a VirtualBox virtual machine provides 
 - Easier recovery if software becomes misconfigured
 - Ability to create snapshots before major changes and revert if issues occur
 
-For users who are new to Linux or AI tooling, this contained approach is generally
-safer than installing and configuring these tools directly on the host operating
-system.
-
-Download software exclusively from official sources (Ubuntu, Oracle VirtualBox,
-OpenClaw, EverClaw, Morpheus) and avoid third-party installers or unofficial
-modified packages. Regularly update Ubuntu, Oracle VirtualBox, OpenClaw, EverClaw,
-and Node.js — updates often contain important security fixes and compatibility
-improvements.
+Download software only from official sources — Ubuntu, Oracle VirtualBox, OpenClaw,
+EverClaw, Morpheus — and avoid third-party or unofficially modified installers.
+Regularly update Ubuntu, Oracle VirtualBox, OpenClaw, EverClaw, and Node.js for
+security fixes and compatibility improvements.
 
 ## Installation
 
 <Steps>
   <Step title="Install Ubuntu for desktop">
-    Visit the official Ubuntu download page: https://ubuntu.com/download/desktop
+    Visit the [official Ubuntu download page](https://ubuntu.com/download/desktop).
 
-    Choose the Ubuntu version you wish to install.
-
-    LTS (Long-Term Support) versions are recommended for stability and longer support.
-
-    Non-LTS versions provide newer features but have shorter support periods.
+    Choose the Ubuntu version you wish to install. LTS (Long-Term Support) versions
+    are recommended for stability and longer support; non-LTS versions provide
+    newer features but have shorter support periods.
 
     Click Download and save the Ubuntu ISO file to your computer.
   </Step>
 
   <Step title="Install Oracle VirtualBox">
-    Navigate to the official website for Oracle VirtualBox and Install the Windows Installer: Oracle VM VirtualBox - Downloads | Oracle Technology Network | Oracle
+    Navigate to the [official VirtualBox downloads page](https://www.virtualbox.org/wiki/Downloads) and download the installer for your host OS.
 
-    Run the Installer:  Double-click the downloaded installer file and follow the on-screen instructions to install VirtualBox on your machine.
+    Double-click the downloaded installer and follow the on-screen instructions to install VirtualBox.
+
+    **VirtualBox is installed.**
   </Step>
 
   <Step title="Obtain a Morpheus API Key">
-    Navigate to the Morpheus website: Morpheus
+    Navigate to the [Morpheus website](https://mor.org).
 
-    Click: Access Inference
+    Click [Access Inference](https://app.mor.org).
 
-    If you have an already existing account, then Sign In with your associated details.
+    If you have an existing account, Sign In with your associated details. If not, click Sign Up at the bottom of the form and fill in the requested details.
 
-    If not, then click on the button to Sign Up at the bottom of the form and fill in the correct details as requested.
+    After successful registration, you'll be redirected to the Inference API Admin Page. Create a new API key.
 
-    After successful registration, you will be redirected to the: Inference API Admin Page
-
-    Create a new API key.
-
-    Important: Copy and store your API key securely.
-
-    The key is only displayed once and cannot be viewed again after creation.
+    **Important:** copy and store your API key securely — it's only displayed once and cannot be viewed again after creation.
   </Step>
 
   <Step title="Create a New Virtual Machine in VirtualBox">
-    Open VirtualBox: Launch VirtualBox on your host machine.
+    1. Launch VirtualBox on your host machine.
+    2. Click the "New" button in the VirtualBox manager window.
+    3. Enter a name for the virtual machine (for example, Ubuntu VM).
+    4. Select the Ubuntu ISO image downloaded earlier.
+    5. Verify that the operating system details are detected automatically.
+    6. Enter the required installation information:
+       - Username
+       - Password
+       - Hostname
+    7. Ensure Install Guest Additions is enabled.
+    8. Allocate memory: at least 4 GB RAM recommended, and at least 2 CPUs.
+    9. Select "Finish" to create the Virtual Machine.
 
-    Create a New Virtual Machine: Click the "New" button in the VirtualBox manager window.
-
-    Enter a name for the virtual machine (for example, Ubuntu VM).
-
-    Select the Ubuntu ISO image downloaded earlier.
-
-    Verify that the operating system details are detected automatically
-
-    Enter the required installation information:
-
-    Username
-
-    Password
-
-    Hostname
-
-    Ensure Install Guest Additions is enabled.N.B. Store these details in a safe place as they might be hard to recover if forgotten.
-
-    Memory Allocation: Allocate an appropriate amount of RAM to your virtual machine.
-
-    At least 4GB is recommended for a smooth experience and the Number of CPU’s should at least be 2 as well.
-
-    Create a Virtual Hard Disk: Select "Finish” to create the Virtual Machine.
+    <Note>
+      Store your VM username/password/hostname somewhere safe — they can be hard
+      to recover if forgotten.
+    </Note>
   </Step>
 
   <Step title="Installing Ubuntu in the Virtual Machine">
-    Select the Virtual Machine: In the VirtualBox manager window, select the virtual machine you just created.
-
-    Start the Virtual Machine: Click the "Start" button to start the virtual machine.
-
-    Install Ubuntu: When you start your machine, you will first encounter the GNU GRUB Screen, Select the option “Try or install Ubuntu”.
-
-    Follow the Ubuntu installation wizard.
-
-    Configure:
-
-    Language
-
-    Keyboard Layout
-
-    Time Zone
-
-    Installation Type
-
-    User Credentials
-
-    Complete the installation and restart the virtual machine when prompted.
+    1. Select the virtual machine you just created in the VirtualBox manager window.
+    2. Click "Start" to boot the virtual machine.
+    3. At the GNU GRUB screen, select "Try or install Ubuntu."
+    4. Follow the Ubuntu installation wizard, configuring:
+       - Language
+       - Keyboard Layout
+       - Time Zone
+       - Installation Type
+       - User Credentials
+    5. Complete the installation and restart the virtual machine when prompted.
 
     Once Ubuntu loads, open Terminal and update the system:
 
     ```bash
     sudo apt update && sudo apt upgrade -y
     ```
+
+    **Ubuntu VM is installed and up to date.**
   </Step>
 
   <Step title="Install OpenClaw">
-    Open Terminal inside Ubuntu.
-
-    Run:
+    Open Terminal inside Ubuntu and run:
 
     ```bash
     curl -fsSL https://openclaw.ai/install.sh | bash
     ```
 
     Wait for the installation to complete.
+
+    **OpenClaw is installed.**
   </Step>
 
   <Step title="OpenClaw Onboarding">
@@ -204,6 +182,8 @@ improvements.
     - **Configure skills:** select No
     - **Enable Hooks:** enable all of them like shown
     - **Hatch your agent:** select Hatch later
+
+    **Onboarding wizard complete.**
   </Step>
 
   <Step title="Install EverClaw (Morpheus Skill)">
@@ -213,19 +193,21 @@ improvements.
     curl -fsSL https://get.everclaw.xyz | bash
     ```
 
-    Wait for the installation process to finish successfully.
+    Or
 
-    The installer will:
+    ```bash
+    curl -fsSL https://raw.githubusercontent.com/EverClaw/EverClaw/main/packages/core/scripts/install-with-deps.sh | bash
+    ```
 
-    Verify dependencies
+    Wait for the installation to complete successfully. The installer will:
 
-    Install EverClaw
+    - Verify dependencies
+    - Install EverClaw
+    - Configure OpenClaw integration
+    - Provision a temporary bootstrap inference key
+    - Configure local fallback options
 
-    Configure OpenClaw integration
-
-    Provision a temporary bootstrap inference key
-
-    Configure local fallback options
+    **EverClaw is installed.**
   </Step>
 
   <Step title="Import Your Morpheus API Key">
@@ -235,17 +217,20 @@ improvements.
     cd ~/.openclaw/workspace/skills/everclaw
     ```
 
-    Note: the installed directory is confirmed `everclaw` (verified via fresh-install testing on OpenClaw 2026.7.1-2). If it's missing, run:
+    <Note>
+      The installed directory is confirmed `everclaw` (verified via fresh-install
+      testing on OpenClaw 2026.7.1-2). If it's missing, run
+      `ls ~/.openclaw/workspace/skills/` and use whichever directory is present.
+    </Note>
 
-    ```bash
-    ls ~/.openclaw/workspace/skills/
-    ```
-
-    and use whichever directory is present.
-
-    Note: EverClaw's installer (previous step) may already have provisioned a bundled temporary starter key in `evcl-...` format — this is different from your own Morpheus API key (`sk...` format) from the Obtain a Morpheus API Key step above.
-
-    For this step, use your `sk-...` key, not the bundled `evcl-...` one — the bundled key is a fallback, not a replacement for your own account key.
+    <Note>
+      EverClaw's installer (previous step) may already have provisioned a bundled
+      temporary starter key in `evcl-...` format — this is different from your
+      own Morpheus API key (`sk...` format) from the Obtain a Morpheus API Key
+      step above. For this step, use your `sk-...` key, not the bundled
+      `evcl-...` one — the bundled key is a fallback, not a replacement for your
+      own account key.
+    </Note>
 
     Run:
 
@@ -264,7 +249,9 @@ improvements.
 
     If successful, EverClaw should display:
 
-    ### Morpheus API Gateway configured!
+    ```
+    Morpheus API Gateway configured!
+    ```
   </Step>
 
   <Step title="Remove the Bonjour Plugin Block (Required)">
@@ -334,7 +321,7 @@ improvements.
     openclaw gateway restart
     ```
 
-    If Restart Fails:
+    If restart fails:
 
     ```bash
     openclaw gateway stop
@@ -345,16 +332,24 @@ improvements.
     ```bash
     openclaw gateway start
     ```
+
+    **Gateway restarted successfully.**
   </Step>
 
   <Step title="Launch OpenClaw Chat">
-    ### Run:
+    Run:
 
     ```bash
     openclaw chat
     ```
 
-    You should now be able to use Morpheus models through EverClaw.
+    Send a test message and confirm you get a response.
+
+    **You should now be able to use Morpheus models through EverClaw.**
+
+    <Frame>
+      <img src="/api-gateway/images/api-gateway-ubuntu-guide-01-first-response.png" alt="OpenClaw chat session showing a successful first response from a Morpheus-hosted model through the API Gateway" />
+    </Frame>
   </Step>
 </Steps>
 
@@ -513,8 +508,21 @@ side rather than a setup mistake.
 
 ### EverClaw shows "needs setup" / "visible to model: no" even after being enabled
 
-Some installed versions of EverClaw's SKILL.md declare optional environment variables as objects, but the running OpenClaw version may expect requires.env as a plain string array. This mismatch can show as: environment: ✗ [object object], ✗ [object object]. Fix: open the skill's SKILL.md (in the `everclaw` directory), back it up, remove the env: block under requires: while keeping bins:, then run: openclaw gateway restart && openclaw skills info everclaw. Expect ready and visible to model: yes when fixed.
+Some installed versions of EverClaw's SKILL.md declare optional environment variables as objects, but the running OpenClaw version may expect `requires.env` as a plain string array. This mismatch can show as:
+
+```
+environment: ✗ [object object], ✗ [object object]
+```
+
+**Fix:**
+1. Open the skill's `SKILL.md` (in the `everclaw` directory) and back it up.
+2. Remove the `env:` block under `requires:`, keeping `bins:`.
+3. Run `openclaw gateway restart && openclaw skills info everclaw`.
+
+Expect `ready` and `visible to model: yes` when fixed.
 
 ### Asking the model to use EverClaw doesn't seem to do anything
 
-EverClaw is not a /everclaw slash command. It installs a permanent inference connection (used automatically for ordinary chat, no invocation needed) and separately ships a diagnostic/setup skill that only activates for matching natural-language requests, e.g. "use the everclaw skill to perform a read-only diagnosis of my morpheus setup." Verify the skill itself is working with: openclaw skills info everclaw (look for ready and visible to model: yes) rather than relying on the model's own claims.
+EverClaw is not a `/everclaw` slash command. It installs a permanent inference connection used automatically for ordinary chat — no invocation needed — and separately ships a diagnostic/setup skill that only activates for matching natural-language requests, e.g. "use the everclaw skill to perform a read-only diagnosis of my morpheus setup."
+
+**To verify the skill itself is working:** run `openclaw skills info everclaw` and look for `ready` and `visible to model: yes`, rather than relying on the model's own claims.

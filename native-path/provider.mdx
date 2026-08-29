@@ -55,15 +55,18 @@ further down the chain first.
 | OS | Linux, Windows, macOS | Ubuntu 22.04+ |
 
 Plus: a wallet with a small amount of **Base ETH** (gas) and **MOR** (1–10 for staking),
-and Python 3.10+ if running your own model server.
+and [Python](https://python.org) 3.10+ if running your own model server.
 
 ---
 
 ## Security Considerations
 
-> 🔐 **Never put your private key in a config file.** This guide leaves
-> `WALLET_PRIVATE_KEY` blank in `.env` and injects it at runtime from your OS's secure
-> credential store instead — see the Configure the Router Securely step below.
+<Warning>
+  **Never put your private key in a config file.** This guide leaves
+  `WALLET_PRIVATE_KEY` blank in `.env` and injects it at runtime from your OS's
+  secure credential store instead — see the Configure the Router Securely step
+  below.
+</Warning>
 
 1. Never store a private key in a config file — OS keychain or runtime env var only.
 2. Use a **dedicated wallet** for providing, not your main one.
@@ -81,18 +84,21 @@ and Python 3.10+ if running your own model server.
 
 <Steps>
   <Step title="Fund a Wallet on Base">
-    1. Install MetaMask (or your preferred EVM wallet), add Base:
+    1. Install [MetaMask](https://metamask.io) (or your preferred EVM wallet), add Base:
        Network `Base` · RPC `https://mainnet.base.org` · Chain ID `8453` · Currency `ETH` ·
        Explorer `https://basescan.org`.
     2. Send a small amount of **Base ETH** and **MOR**
        (`0x7431aDa8a591C955a994a21710752EF9b882b8e3`) to this wallet.
 
-    > ⚠️ **Unverified — gas threshold discrepancy.** One field deployment observed a
-    > low-balance warning triggering below 0.100 ETH; earlier guidance in this project
-    > assumed ~0.01 ETH was sufficient. Fund with at least **0.1 ETH** until this is
-    > confirmed against a live node, rather than trusting either number blindly.
+    <Warning>
+      **Unverified — gas threshold discrepancy.** One field deployment observed a
+      low-balance warning triggering below 0.100 ETH; earlier guidance in this
+      project assumed ~0.01 ETH was sufficient. Fund with at least **0.1 ETH**
+      until this is confirmed against a live node, rather than trusting either
+      number blindly.
+    </Warning>
 
-    ✅ Wallet funded.
+    **Wallet funded.**
   </Step>
 
   <Step title="Get the Router">
@@ -116,11 +122,13 @@ and Python 3.10+ if running your own model server.
     **Option C — Desktop App (Windows/macOS)**, for a GUI: download
     `win-x64-morpheus-app-<version>.exe` from the same releases page.
 
-    > ⚠️ Release filenames change between versions — check the
-    > [releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
-    > rather than trusting an old link.
+    <Warning>
+      Release filenames change between versions — check the
+      [releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
+      rather than trusting an old link.
+    </Warning>
 
-    ✅ You have a router, one way or another.
+    **You have a router, one way or another.**
   </Step>
 
   <Step title="Choose Your Topology">
@@ -141,7 +149,7 @@ and Python 3.10+ if running your own model server.
     Windows reboot, or networking change, meaning the portproxy rule needs refreshing each
     time. Keep this in mind; it's the single most common WSL2-specific gotcha.
 
-    ✅ Pick one and continue — the remaining steps apply to both, with WSL2-specific notes
+    **Pick one and continue** — the remaining steps apply to both, with WSL2-specific notes
     called out where they differ.
   </Step>
 
@@ -149,14 +157,14 @@ and Python 3.10+ if running your own model server.
     The router forwards inference requests to a backend you run yourself, exposing an
     **OpenAI-compatible API**.
 
-    **Easiest — Ollama:**
+    **Easiest — [Ollama](https://ollama.com):**
     ```bash
     curl -fsSL https://ollama.com/install.sh | sh
     ollama pull qwen2.5:7b
     ollama serve   # port 11434
     ```
 
-    **For GPU throughput — vLLM:**
+    **For GPU throughput — [vLLM](https://github.com/vllm-project/vllm):**
     ```bash
     python3 -m venv ~/vllm-env
     source ~/vllm-env/bin/activate
@@ -167,12 +175,14 @@ and Python 3.10+ if running your own model server.
         --gpu-memory-utilization 0.85 --max-model-len 4096 --port 8000 --host 0.0.0.0
     ```
 
-    > ⚠️ **Common trap: mixed Python environments.** If vLLM is installed inside a venv
-    > (e.g. `~/vllm-env`), you must `source ~/vllm-env/bin/activate` and then use `python`
-    > — **not** `python3` (which may resolve to system Python, producing
-    > `ModuleNotFoundError: No module named 'vllm'`) and **not** `py` (not a real command on
-    > Linux/WSL). Confirm with `which python` — it should point *inside* your venv, not
-    > `/usr/bin/python3`.
+    <Warning>
+      **Common trap: mixed Python environments.** If vLLM is installed inside a
+      venv (e.g. `~/vllm-env`), you must `source ~/vllm-env/bin/activate` and
+      then use `python` — **not** `python3` (which may resolve to system Python,
+      producing `ModuleNotFoundError: No module named 'vllm'`) and **not** `py`
+      (not a real command on Linux/WSL). Confirm with `which python` — it should
+      point *inside* your venv, not `/usr/bin/python3`.
+    </Warning>
 
     Run a direct test against your model server, before connecting the router:
     ```bash
@@ -188,7 +198,7 @@ and Python 3.10+ if running your own model server.
     Confirm a real completion works here — `/v1/models` alone isn't proof. If this fails,
     don't troubleshoot Morpheus yet.
 
-    ✅ Your model server answers on its own.
+    **Your model server answers on its own.**
   </Step>
 
   <Step title="Configure the Router Securely">
@@ -231,14 +241,17 @@ and Python 3.10+ if running your own model server.
     security add-generic-password -a "$(whoami)" -s "morpheus-wallet-key" -w "YOUR_PRIVATE_KEY"
     ```
 
-    > ⚠️ **If you see `failed to unlock correct collection` or `Using env wallet. Private
-    > key persistence unavailable`** in the router log, your keychain integration isn't
-    > available (common on headless/WSL2 setups without a desktop keyring running) — the
-    > router falls back to reading `WALLET_PRIVATE_KEY` from the environment each start.
-    > This still works, it's just less convenient — you'll need to `export
-    > WALLET_PRIVATE_KEY=...` before every start rather than it persisting automatically.
+    <Warning>
+      **If you see `failed to unlock correct collection` or `Using env wallet.
+      Private key persistence unavailable`** in the router log, your keychain
+      integration isn't available (common on headless/WSL2 setups without a
+      desktop keyring running) — the router falls back to reading
+      `WALLET_PRIVATE_KEY` from the environment each start. This still works,
+      it's just less convenient — you'll need to `export WALLET_PRIVATE_KEY=...`
+      before every start rather than it persisting automatically.
+    </Warning>
 
-    ✅ Router configured, no plaintext key on disk.
+    **Router configured, no plaintext key on disk.**
   </Step>
 
   <Step title="Register On-Chain">
@@ -260,31 +273,44 @@ and Python 3.10+ if running your own model server.
       -H "Content-Type: application/json" \
       -d '{"modelId": "0xYOUR_MODEL_ID", "endpoint": "http://YOUR_PUBLIC_ENDPOINT:3333", "pricePerSecond": "1000000000000"}'
     ```
-    > Amounts are in wei. Endpoint names may shift between versions — check
-    > `http://localhost:8082/swagger/index.html` for your version's exact API surface.
-    > Do not copy historical stake amounts or prices as current requirements.
+    <Note>
+      Amounts are in wei. Endpoint names may shift between versions — check
+      `http://localhost:8082/swagger/index.html` for your version's exact API
+      surface. Do not copy historical stake amounts or prices as current
+      requirements.
+    </Note>
 
-    **Path B — web portal** (`myprovider.mor.org`) — **unverified in this project.** If you
-    use it: connect wallet, enter endpoint, register model, stake, confirm in MetaMask.
+    **Path B — web portal** ([myprovider.mor.org](https://myprovider.mor.org)) — **unverified in this project.** If you use it:
+    1. Connect wallet.
+    2. Enter endpoint.
+    3. Register model.
+    4. Stake.
+    5. Confirm in [MetaMask](https://metamask.io).
 
-    > ⚠️ **If MyProvider generates a complete model-configuration line or block after
-    > registration, copy it exactly** — don't reconstruct it manually, don't copy only the
-    > model ID, don't substitute a guessed value. The UI's generated output is authoritative
-    > for the fields it produces; a manually reconstructed line can silently omit something.
+    <Warning>
+      **If MyProvider generates a complete model-configuration line or block
+      after registration, copy it exactly** — don't reconstruct it manually,
+      don't copy only the model ID, don't substitute a guessed value. The UI's
+      generated output is authoritative for the fields it produces; a manually
+      reconstructed line can silently omit something.
+    </Warning>
 
     **Path C — direct contract call (advanced)**, via
     [Basescan's Write tab](https://basescan.org/address/0x6aBE1d282f72B474E54527D93b979A4f64d3030a#writeContract):
     `ModelFacet`/`SessionFacet`/`AllowanceFacet` directly.
 
-    > 🔒 **Provider stake is not the same as consumer session stake.** Consumer sessions are
-    > currently subject to a ~24h hold before the stake is claimable, requiring a manual
-    > `withdrawUserStakes` call (see the [Desktop App](/native-path/desktop-app) and
-    > [morctl](/native-path/morctl) guides). Your **provider registration stake**
-    > follows separate rules — don't assume the two behave identically.
+    <Note>
+      **Provider stake is not the same as consumer session stake.** Consumer
+      sessions are currently subject to a ~24h hold before the stake is
+      claimable, requiring a manual `withdrawUserStakes` call (see the
+      [Desktop App](/native-path/desktop-app) and [morctl](/native-path/morctl)
+      guides). Your **provider registration stake** follows separate rules —
+      don't assume the two behave identically.
+    </Note>
 
-    **📸 Capture 5 — the on-chain confirmation**, Basescan transaction or CLI JSON response.
+    **[Screenshot pending]** — the on-chain confirmation: Basescan transaction or CLI JSON response.
 
-    ✅ You have a real, on-chain model ID.
+    **You have a real, on-chain model ID.**
   </Step>
 
   <Step title="Open Your Firewall">
@@ -320,15 +346,16 @@ and Python 3.10+ if running your own model server.
     Test-NetConnection YOUR_PUBLIC_ENDPOINT -Port 3333    # Windows
     ```
 
-    > ⚠️ **Never `curl` or open port 3333 in a browser.** It's a raw Morpheus protocol
-    > listener, not HTTP — sending HTTP traffic to it produces
-    > `invalid character 'G' looking for beginning of value` (because `GET ...` isn't a
-    > valid Morpheus protocol message). Use `nc`/`Test-NetConnection` only.
+    <Warning>
+      **Never `curl` or open port 3333 in a browser.** It's a raw Morpheus
+      protocol listener, not HTTP — sending HTTP traffic to it produces
+      `invalid character 'G' looking for beginning of value` (because `GET ...`
+      isn't a valid Morpheus protocol message). Use `nc`/`Test-NetConnection` only.
+    </Warning>
 
-    **📸 Capture 6 — the successful external connection test**, run from a genuinely
-    different network.
+    **[Screenshot pending]** — the successful external connection test, run from a genuinely different network.
 
-    ✅ Reachable from the internet, not just locally.
+    **Reachable from the internet, not just locally.**
   </Step>
 
   <Step title="Start the Router and Verify Local Health">
@@ -385,7 +412,7 @@ and Python 3.10+ if running your own model server.
     A healthy startup log shows the wallet loaded, listening on 3333, with no config
     errors.
 
-    ✅ Running, healthy, and will survive a restart.
+    **Running, healthy, and will survive a restart.**
   </Step>
 
   <Step title="Test Real Inference">
@@ -402,7 +429,7 @@ and Python 3.10+ if running your own model server.
     ```
     A real reply confirms the full loop — you're earning.
 
-    ✅ Provider setup complete, end to end.
+    **Provider setup complete, end to end.**
   </Step>
 </Steps>
 
@@ -457,9 +484,13 @@ not the provider's local config. A listening proxy and a successful port probe d
 | 0.001 | 3.6 MOR | Standard |
 | 0.01 | 36 MOR | Premium/large models |
 
-**Costs:** one-time MOR stake (unstakeable later), small ETH gas per transaction,
-ongoing electricity/bandwidth. These are illustrative, not current market guidance —
-confirm current pricing units and requirements before relying on them financially.
+**Costs:**
+- One-time MOR stake (unstakeable later)
+- Small ETH gas per transaction
+- Ongoing electricity/bandwidth
+
+These are illustrative, not current market guidance — confirm current pricing units
+and requirements before relying on them financially.
 
 ---
 

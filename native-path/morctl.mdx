@@ -29,20 +29,24 @@ inference" chain with one call.
 **What you'll need:**
 - A running Morpheus proxy-router (Desktop App or headless).
 - A **funded wallet** — at least 5 MOR and a small amount of Base ETH.
-- **Go 1.21+**, only if building from source.
+- **[Go](https://go.dev) 1.21+**, only if building from source.
 
-> 🔐 **About official `mor-cli`:** has several confirmed, unresolved bugs on Windows
-> ([issue #792](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/792)).
-> `morctl` is the recommended alternative until those are fixed.
+<Warning>
+  **About official `mor-cli`:** has several confirmed, unresolved bugs on Windows
+  ([issue #792](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/792)).
+  `morctl` is the recommended alternative until those are fixed.
+</Warning>
 
 ---
 
 ## Security Considerations
 
-> 🔐 The `.cookie` file you point `morctl` at (Step 2) is your router's auto-generated
-> auth credential — treat it like a password: don't commit it to Git or share it. See
-> the [headless/developer guide](/native-path/headless-developer) for the fuller
-> private-key handling guidance that applies to the same underlying router.
+<Warning>
+  The `.cookie` file you point `morctl` at (Step 2) is your router's auto-generated
+  auth credential — treat it like a password: don't commit it to [Git](https://git-scm.com) or share it. See
+  the [headless/developer guide](/native-path/headless-developer) for the fuller
+  private-key handling guidance that applies to the same underlying router.
+</Warning>
 
 ---
 
@@ -62,7 +66,7 @@ inference" chain with one call.
 
     *No output means it worked.*
 
-    ✅ You have a binary.
+    **You have a binary.**
   </Step>
 
   <Step title="Point It at Your Router's Credentials">
@@ -71,7 +75,7 @@ inference" chain with one call.
     $env:COOKIE_FILE_PATH = "C:\path\to\.cookie"   # Windows
     ```
 
-    ✅ Credentials in place.
+    **Credentials in place.**
   </Step>
 
   <Step title="Preflight Check">
@@ -82,7 +86,7 @@ inference" chain with one call.
     A successful run shows three key lines: router reachable, wallet balance, and
     "Preflight OK".
 
-    ✅ Ready for Step 4.
+    **Ready for Step 4.**
   </Step>
 
   <Step title="Open a Session and Run Inference">
@@ -96,7 +100,7 @@ inference" chain with one call.
 
     This is the single most important capture in the guide.
 
-    ✅ Core loop works.
+    **Core loop works.**
   </Step>
 
   <Step title="Have a Real Conversation">
@@ -107,7 +111,7 @@ inference" chain with one call.
     Type `exit`/`quit` to stop chatting locally — the session keeps running in the
     background.
 
-    ✅ Multi-turn conversation confirmed.
+    **Multi-turn conversation confirmed.**
   </Step>
 
   <Step title="Session Reuse">
@@ -119,16 +123,20 @@ inference" chain with one call.
 
     Force fresh: `./morctl --dev --fresh`
 
-    > ⚠️ **Known limitation:** session *reuse* correctly avoids a new stake, but
-    > conversation *history* is not currently persisted across separate `morctl` runs —
-    > exiting and restarting resets chat memory even though the underlying session is the
-    > same one. This is being worked on; see the project roadmap.
+    <Warning>
+      **Known limitation:** session *reuse* correctly avoids a new stake, but
+      conversation *history* is not currently persisted across separate `morctl` runs —
+      exiting and restarting resets chat memory even though the underlying session is the
+      same one. This is being worked on; see the project roadmap.
+    </Warning>
 
-    ✅ You understand when a session opens vs. reuses.
+    **You understand when a session opens vs. reuses.**
   </Step>
 
   <Step title="What Happens When You're Done">
-    ⚠️ **Updated — recently changed, more involved than before.**
+    <Warning>
+      **Updated** — recently changed, more involved than before.
+    </Warning>
 
     - Letting a session expire naturally only auto-settles the small session **cost** —
       not your full stake.
@@ -143,7 +151,7 @@ inference" chain with one call.
     - Exiting `--interactive` only stops the local loop — never closes the session early,
       so no early-close penalty either way.
 
-    ✅ Full loop understood, including the currently-manual recovery step.
+    **Full loop understood, including the currently-manual recovery step.**
   </Step>
 </Steps>
 

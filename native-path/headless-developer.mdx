@@ -41,9 +41,11 @@ automates for you.
 
 ## Security Considerations
 
-> 🔐 **You'll be handling a real private key in this guide.** Never write it to a
-> committed file, never paste it into chat tools, and clear it from your shell history
-> when you're done (commands at the end of Step 3).
+<Warning>
+  **You'll be handling a real private key in this guide.** Never write it to a
+  committed file, never paste it into chat tools, and clear it from your shell
+  history when you're done (commands at the end of Step 3).
+</Warning>
 
 ---
 
@@ -64,11 +66,13 @@ automates for you.
     Invoke-WebRequest "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases/download/v7.3.0/win-x64-morpheus-router-7.3.0.exe" -OutFile proxy-router.exe
     ```
 
-    > ⚠️ Check the [releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
-    > for the current version — filenames change between releases. Avoid any `-test`-suffixed
-    > release unless you specifically want testnet.
+    <Warning>
+      Check the [releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
+      for the current version — filenames change between releases. Avoid any
+      `-test`-suffixed release unless you specifically want testnet.
+    </Warning>
 
-    ✅ You have a router binary.
+    **You have a router binary.**
   </Step>
 
   <Step title="Configure .env">
@@ -109,7 +113,7 @@ automates for you.
     Note `WALLET_PRIVATE_KEY` is left **blank** — you'll inject it live in Step 3, not store
     it in this file.
 
-    ✅ Router configured.
+    **Router configured.**
   </Step>
 
   <Step title="Start the Router and Provide a Wallet">
@@ -158,7 +162,7 @@ automates for you.
 
     This is your confirmation the key worked — annotate: *"If this doesn't appear, the key wasn't accepted — check Terminal 2's response for an error."*
 
-    ✅ Router is running with a real, funded wallet, key never written to disk.
+    **Router is running with a real, funded wallet, key never written to disk.**
   </Step>
 
   <Step title="Open a Session">
@@ -180,7 +184,7 @@ automates for you.
     ```
     Copy this — you need it for every inference call in this session.
 
-    ✅ Session open, MOR staked.
+    **Session open, MOR staked.**
   </Step>
 
   <Step title="Run Inference">
@@ -194,12 +198,16 @@ automates for you.
 
     Tip: append `| python3 -m json.tool` for readable output.
 
-    ✅ You've run raw inference with no client library at all.
+    **You've run raw inference with no client library at all.**
   </Step>
 
   <Step title="Multi-Turn Conversation (Optional)">
-    ⚠️ **The router does not remember previous messages on its own** — this is intended
-    behavior, not a bug (confirmed by maintainers). Two ways to get real conversation memory:
+    <Warning>
+      **The router does not remember previous messages on its own** — this is
+      intended behavior, not a bug (confirmed by maintainers).
+    </Warning>
+
+    Two ways to get real conversation memory:
 
     **Option A — resend full history yourself** (what `morctl --interactive` does
     automatically): include every prior message in the `messages` array on each call.
@@ -224,7 +232,7 @@ automates for you.
     `.env`. History for a given `chat_id` is viewable locally at
     `./data/chats/<CHAT_ID>.json`.
 
-    ✅ Genuine multi-turn conversation via the raw API.
+    **Genuine multi-turn conversation via the raw API.**
   </Step>
 
   <Step title="Session Lifecycle — What Happens Next">
@@ -233,14 +241,15 @@ automates for you.
     - **Stake return is not automatic or instant.** As of the current router version, the
       full stake goes through a hold/maturation period (roughly 24 hours) before it's
       claimable, and claiming currently requires a **separate manual call** to
-      `withdrawUserStakes` on the Diamond contract (via Basescan's Write tab, or a direct
-      contract call) — this is not yet exposed through the router's HTTP API. Track
-      [issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827) for
-      when an API for this ships.
+      `withdrawUserStakes` on the [Diamond contract](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a)
+      (via [Basescan's Write tab](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a#writeContract),
+      or a direct contract call) — this is not yet exposed through the router's HTTP API.
+      Track [issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827)
+      for when an API for this ships.
     - **Don't close early** unless you have a reason to — early closes route through the
       same hold mechanism with no offsetting benefit.
 
-    ✅ You understand the full lifecycle, including the part that trips people up.
+    **You understand the full lifecycle, including the part that trips people up.**
   </Step>
 </Steps>
 

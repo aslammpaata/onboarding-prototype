@@ -59,6 +59,16 @@ errors before wasting time debugging a broken preview.
 - **macOS screenshots** and the **Morpheus P2P Inference in OpenClaw — Setup &
   Operations Guide** are known, explicitly-accepted in-progress items — not launch
   blockers for the local prototype.
+- **A VS Code / Cline onboarding guide exists only as an unconverted draft** at
+  `docs/testing/Using_Morpheus_in_VS_Code.md`. It's real guide content (task-recipe
+  style, matches this prototype's scope) but is not production-ready as-is: it's
+  plain `.md` with no frontmatter, uses bare `## Step N:` headings instead of the
+  required `<Steps>`/`<Step title="...">` component (see MDX gotcha #3 above), has
+  no home under `native-path/` or `api-gateway/`, and isn't registered in
+  `docs.json` nav — so it doesn't render anywhere yet. Don't mistake it for either
+  a finished page or a test report; before it can ship it needs (a) conversion to
+  `.mdx` with proper frontmatter and `<Steps>`, (b) a move to a real guide
+  directory (e.g. `api-gateway/vscode.mdx`), and (c) a nav entry in `docs.json`.
 
 ## Content decisions made deliberately — don't silently "fix" these back
 

@@ -56,12 +56,9 @@
   },
   "navbar": {
     "links": [
-      { "label": "Technical Docs (nodedocs)", "href": "https://nodedocs.mor.org" }
-    ],
-    "primary": {
-      "type": "github",
-      "href": "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node"
-    }
+      { "label": "Technical Docs (nodedocs)", "href": "https://nodedocs.mor.org" },
+      { "label": "API Docs", "href": "https://apidocs.mor.org/" }
+      ]
   },
   "contextual": {
     "options": ["copy", "view", "mcp", "cursor", "chatgpt", "claude", "perplexity", "vscode"]

@@ -26,6 +26,10 @@
         "tab": "Native Path",
         "groups": [
           {
+            "group": "Concepts",
+            "pages": ["native-path/understanding-session-economics"]
+          },
+          {
             "group": "Consumer",
             "pages": [
               "native-path/desktop-app",

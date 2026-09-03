@@ -300,12 +300,10 @@ and [Python](https://python.org) 3.10+ if running your own model server.
     `ModelFacet`/`SessionFacet`/`AllowanceFacet` directly.
 
     <Note>
-      **Provider stake is not the same as consumer session stake.** Consumer
-      sessions are currently subject to a ~24h hold before the stake is
-      claimable, requiring a manual `withdrawUserStakes` call (see the
-      [Desktop App](/native-path/desktop-app) and [morctl](/native-path/morctl)
-      guides). Your **provider registration stake** follows separate rules —
-      don't assume the two behave identically.
+      🔒 **Note on the test session's stake:** this behaves like any consumer session —
+      see [Understanding Session Economics](/native-path/understanding-session-economics)
+      for how escrow and claiming actually work. This is separate from your **provider**
+      registration stake above, which follows different rules.
     </Note>
 
     **[Screenshot pending]** — the on-chain confirmation: Basescan transaction or CLI JSON response.

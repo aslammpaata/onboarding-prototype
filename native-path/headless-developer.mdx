@@ -237,19 +237,12 @@ automates for you.
 
   <Step title="Session Lifecycle — What Happens Next">
     - **Let it expire naturally.** Your node auto-submits the close transaction ~1 minute
-      after `endsAt`, and your stake is eligible for return.
-    - **Stake return is not automatic or instant.** As of the current router version, the
-      full stake goes through a hold/maturation period (roughly 24 hours) before it's
-      claimable, and claiming currently requires a **separate manual call** to
-      `withdrawUserStakes` on the [Diamond contract](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a)
-      (via [Basescan's Write tab](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a#writeContract),
-      or a direct contract call) — this is not yet exposed through the router's HTTP API.
-      Track [issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827)
-      for when an API for this ships.
-    - **Don't close early** unless you have a reason to — early closes route through the
-      same hold mechanism with no offsetting benefit.
-
-    **You understand the full lifecycle, including the part that trips people up.**
+      after `endsAt`.
+    - **Closing only returns the small used-cost portion immediately** — the escrow
+      itself requires a separate `withdrawUserStakes` claim. See
+      [Understanding Session Economics](/native-path/understanding-session-economics)
+      for verified on-chain examples and the full explanation.
+    - **Don't close early** unless you have a reason to.
   </Step>
 </Steps>
 

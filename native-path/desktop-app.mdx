@@ -135,15 +135,9 @@ other people's computers around the world, instead of one company's servers.
       your full stake.
     - **Your stake goes into a hold period (~24 hours)** before it's claimable. This is a
       recently-enforced network rule, not a bug in your setup.
-    - **Recovering it currently requires a manual step**: after ~24 hours, someone needs to
-      call `withdrawUserStakes` directly on the [Diamond contract](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a)
-      — via
-      [Basescan's Write tab](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a#writeContract),
-      connecting the same wallet, entering your address and a small iteration count (e.g.
-      `1`–`3`). The app itself does not do this for you yet.
-      ([Tracking issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827).)
 
-    **You understand the full loop, including the part that currently needs a manual step.**
+    For the full picture — verified on-chain examples, why this happens, and how to
+    check it yourself — see [Understanding Session Economics](/native-path/understanding-session-economics).
   </Step>
 </Steps>
 

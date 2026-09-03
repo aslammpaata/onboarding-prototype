@@ -142,16 +142,11 @@ inference" chain with one call.
       not your full stake.
     - Your stake enters a **~24-hour hold** before it's claimable — a network-wide rule,
       not specific to `morctl`.
-    - **Recovering it currently requires a manual call** to `withdrawUserStakes` on the
-      Diamond contract — not yet wired into `morctl` itself. Use
-      [Basescan's Write tab](https://basescan.org/address/0x6abe1d282f72b474e54527d93b979a4f64d3030a#writeContract)
-      with your address and a small iteration count.
-      ([Tracking issue #827](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/issues/827)
-      — an API for this is proposed but not yet shipped.)
     - Exiting `--interactive` only stops the local loop — never closes the session early,
       so no early-close penalty either way.
 
-    **Full loop understood, including the currently-manual recovery step.**
+    See [Understanding Session Economics](/native-path/understanding-session-economics)
+    for verified on-chain examples of exactly this behavior.
   </Step>
 </Steps>
 

@@ -1,0 +1,159 @@
+---
+title: "Wallet Setup & Seed Phrase Safety"
+description: "What a wallet actually is, how to back it up safely, and how to spot a scam — the explainer every Native path guide links to."
+audience: ["consumer", "beginner"]
+---
+
+Every Native path guide — Desktop App, `morctl`, headless router, Provider — has you
+create or connect a wallet at some point. Rather than repeat the same safety warnings
+four times, they all link here. Read this once; it applies no matter which client
+you're using.
+
+---
+
+## What a Wallet Actually Is
+
+A crypto wallet isn't an account with a company — it's a **key pair you control**.
+The practical version:
+
+- Your **seed phrase** (usually 12 or 24 words) is the master key. Anyone who has it
+  has full, permanent, irreversible control of everything in that wallet.
+- Your wallet **address** (the long `0x...` string) is safe to share — it's how
+  people send you MOR or ETH.
+- Your app **password** (Desktop App, browser extension, etc.) only unlocks the app on
+  *this device*. It is not a backup and does not protect your funds if someone else
+  has your seed phrase.
+
+<Warning>
+  **No company, support agent, or piece of software can reset a lost seed phrase.**
+  There's no "forgot password" flow. If it's lost and you don't have a backup, the
+  funds in that wallet are gone permanently. If someone else obtains it, they have the
+  same total control you do — instantly, and irreversibly.
+</Warning>
+
+---
+
+## Creating or Recovering a Wallet
+
+<Steps>
+  <Step title="Decide: new wallet, or an existing one?">
+    - **New to Morpheus?** Create a new wallet — most Native path clients (like the
+      [Desktop App](/native-path/desktop-app)) generate one for you during setup.
+    - **Already have a wallet from elsewhere** (MetaMask, a hardware wallet, another
+      app)? You can recover it using its existing seed phrase instead of creating a
+      second one.
+  </Step>
+
+  <Step title="If creating: write down the seed phrase immediately">
+    You'll see a screen showing 12 or 24 words, in order. This is the only time most
+    clients will display it in full.
+
+    - Write it on paper, by hand, in order.
+    - Do **not** screenshot it.
+    - Do **not** paste it into a notes app, password manager's "secure note," email
+      draft, or cloud storage — even briefly.
+    - Do **not** type it into any website, ever, for any reason.
+  </Step>
+
+  <Step title="Store the paper copy somewhere durable and offline">
+    A drawer, a safe, or a safety deposit box all work. The goal is: it survives your
+    device breaking, and it's not accessible from the internet.
+
+    <Tip>
+      Consider a second copy stored in a different physical location, in case the
+      first is lost to fire, flood, or theft. Some people etch or stamp their phrase
+      into metal for extra durability — overkill for small amounts, worth considering
+      for larger ones.
+    </Tip>
+  </Step>
+
+  <Step title="Confirm the phrase if the app asks you to">
+    Most wallets make you re-enter the words (or a few of them) to confirm you copied
+    them down correctly, before letting you continue. This is a real check — if it
+    fails, re-copy from the original screen rather than guessing.
+  </Step>
+
+  <Step title="Set a local app password">
+    This is separate from the seed phrase. It only protects the app on this specific
+    device from casual access (e.g., someone picking up your laptop) — it does **not**
+    replace or protect the seed phrase itself, and it does not sync anywhere.
+  </Step>
+</Steps>
+
+---
+
+## What Your Seed Phrase Can and Can't Do
+
+| | True or False |
+|---|---|
+| Anyone with my seed phrase can move my funds, from anywhere, without my device | **True** |
+| My seed phrase can be reset like a password if I lose it | **False** — there is no reset |
+| My app password protects my funds even if someone gets my seed phrase | **False** — the seed phrase alone is enough |
+| I need my seed phrase to receive funds | **False** — only your public address is needed for that |
+| Support staff or Morpheus employees might legitimately ask for my seed phrase | **False, always** — see below |
+
+---
+
+## Signs of a Seed Phrase Scam
+
+<Warning>
+  **Nobody legitimate will ever ask for your seed phrase.** Not Morpheus support, not
+  a Discord moderator, not a "wallet sync" or "wallet verification" tool, not a
+  browser extension popup claiming your wallet needs re-authentication. If anything
+  asks for it outside the one-time backup screen during wallet creation, it's a scam —
+  full stop.
+</Warning>
+
+Common patterns worth recognizing:
+
+- A DM or support ticket asking you to "verify" your wallet by entering your phrase
+  into a form or bot.
+- A site that looks like a bridge, faucet, or dashboard, prompting for your seed
+  phrase instead of just asking you to connect a wallet (connecting never requires
+  typing the phrase anywhere).
+- Urgency ("your funds are at risk, act now") paired with a request for the phrase.
+
+If you're ever unsure whether a prompt is legitimate, the safe default is: **don't
+enter it.** A genuine wallet action (sending funds, approving a contract) never
+requires typing your seed phrase into anything after the initial backup step.
+
+---
+
+## Which Client Actually Holds Your Wallet?
+
+- **[Desktop App](/native-path/desktop-app)** — generates and stores the wallet for
+  you, with the guided backup flow described above.
+- **[`morctl`](/native-path/morctl) / [Headless router](/native-path/headless-developer)**
+  — expect you to already have a wallet and provide its credentials (private key or
+  cookie file) directly; they don't walk you through creating one.
+- **[Provider setup](/native-path/provider)** — same as above: bring an existing
+  wallet, funded and ready, before you start.
+
+If you're setting up any of the CLI or headless paths and don't have a wallet yet,
+create one with the Desktop App first, then use its credentials with the other tools.
+
+---
+
+## Troubleshooting
+
+| Situation | What to do |
+|---|---|
+| I lost my seed phrase and don't have a backup | There is no recovery. If the wallet still has a balance, moving forward means creating a new wallet and, if possible, transferring remaining access before it's lost entirely. There is nothing Morpheus support can do to restore it. |
+| I think I typed my seed phrase into something I shouldn't have | Assume the wallet is compromised. Immediately create a new wallet and move any remaining funds to it before someone else does — the address doing this first wins. |
+| I forgot my local app password, but still have my seed phrase | Not a problem — reinstall or reset the app and recover using your seed phrase. This is exactly what the seed phrase is for. |
+| Someone in Discord/support is asking for my seed phrase to "help" | That's not a legitimate request. Don't provide it, and report the account. |
+
+---
+
+## Glossary
+
+- **Seed phrase** — 12 or 24 words that fully control a wallet. The master key.
+- **Private key** — the cryptographic key your seed phrase generates; functionally
+  equivalent in what it controls.
+- **Wallet address** — the public `0x...` string, safe to share, used to receive
+  funds.
+- **App password** — a local unlock for one device's app instance; not a backup, not
+  a substitute for the seed phrase.
+
+**Next:** once your wallet exists, see [Getting MOR & ETH on Base](/native-path/funding-your-wallet)
+to fund it.

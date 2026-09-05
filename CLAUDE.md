@@ -19,10 +19,28 @@ decisions yet — those sit with US leadership, out of scope for this work.
 
 ```
 docs.json              Mintlify nav config
+what-is-morpheus.mdx   Newcomer explainer, linked from index.mdx above the path cards
 index.mdx              Landing page: API Gateway vs Native decision, task recipes
-native-path/           Desktop App, morctl, Headless/Developer, Provider guides
-api-gateway/           Windows, macOS, Ubuntu OpenClaw+EverClaw setup guides
+native-path/           Wallet Setup, Funding, Desktop App, morctl, Headless/Developer,
+                        Provider guides
+api-gateway/           Windows, macOS, Ubuntu OpenClaw+EverClaw setup guides, vscode.mdx
 ```
+
+## Content audit (2026-09-03) and Phase 1 follow-up
+
+A full content-gap audit against apidocs.mor.org and nodedocs.mor.org (83 official
+pages reviewed) found the official docs strong on technical depth but with almost no
+visuals (zero screenshots across all 63 nodedocs.mor.org pages) and three real content
+dead ends: no acquisition/bridging instructions for MOR/ETH on Base anywhere official,
+wallet/seed-phrase safety reduced to one sentence per install page, and no unified map
+of the ~13 mor.org-ecosystem properties. Phase 1 of the resulting roadmap is done:
+`what-is-morpheus.mdx`, `native-path/wallet-setup.mdx`,
+`native-path/funding-your-wallet.mdx`, and the converted `api-gateway/vscode.mdx` all
+exist and are wired into `docs.json` + cross-linked from `index.mdx`,
+`desktop-app.mdx`, `morctl.mdx`, and `provider.mdx`. Remaining phases (session-lifecycle
+diagram, ecosystem map page, zero-to-earning provider checklist, onboarding videos) are
+not yet started — see the audit artifact from that session for the full prioritized
+list if picking this back up.
 
 ## Validate before assuming anything works
 
@@ -59,16 +77,11 @@ errors before wasting time debugging a broken preview.
 - **macOS screenshots** and the **Morpheus P2P Inference in OpenClaw — Setup &
   Operations Guide** are known, explicitly-accepted in-progress items — not launch
   blockers for the local prototype.
-- **A VS Code / Cline onboarding guide exists only as an unconverted draft** at
-  `docs/testing/Using_Morpheus_in_VS_Code.md`. It's real guide content (task-recipe
-  style, matches this prototype's scope) but is not production-ready as-is: it's
-  plain `.md` with no frontmatter, uses bare `## Step N:` headings instead of the
-  required `<Steps>`/`<Step title="...">` component (see MDX gotcha #3 above), has
-  no home under `native-path/` or `api-gateway/`, and isn't registered in
-  `docs.json` nav — so it doesn't render anywhere yet. Don't mistake it for either
-  a finished page or a test report; before it can ship it needs (a) conversion to
-  `.mdx` with proper frontmatter and `<Steps>`, (b) a move to a real guide
-  directory (e.g. `api-gateway/vscode.mdx`), and (c) a nav entry in `docs.json`.
+- **The VS Code / Cline guide has been converted and shipped** as
+  `api-gateway/vscode.mdx` (proper frontmatter, `<Steps>`, registered in `docs.json`
+  under a new "IDE Integrations" group). The original draft at
+  `docs/Using_Morpheus_in_VS_Code.md` is now superseded — treat the `.mdx` version as
+  canonical, not the draft.
 
 ## Content decisions made deliberately — don't silently "fix" these back
 

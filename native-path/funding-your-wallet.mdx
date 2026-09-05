@@ -1,0 +1,140 @@
+---
+title: "Getting MOR & ETH on Base"
+description: "How to actually acquire MOR and ETH on the Base network — the step every Native path guide assumes you've already done."
+audience: ["consumer", "beginner"]
+---
+
+Every Native path guide tells you to "send MOR and ETH to your wallet" and then moves
+on, assuming you already know how to get them onto **Base** specifically. This page is
+that missing step.
+
+<Note>
+  Haven't created a wallet yet? Start with
+  [Wallet Setup & Seed Phrase Safety](/native-path/wallet-setup) first — you'll need
+  an address to send funds to before any of this is useful.
+</Note>
+
+---
+
+## Why You Need Two Different Assets
+
+| Asset | What it's for | Think of it as |
+|---|---|---|
+| **ETH (on Base)** | Gas — the small fee for any on-chain transaction | The toll for using the road |
+| **MOR** | Staking into sessions to access the network | What you're actually here for |
+
+You need a small amount of both. Most first-time setups need far less ETH than
+people expect — gas on Base is a fraction of a cent per transaction — but you can't
+do anything at all without at least a little.
+
+<Warning>
+  **Base is not the same network as Ethereum mainnet or Arbitrum.** MOR and ETH sent
+  on the wrong network will not show up in your Morpheus wallet, and recovering them
+  can be difficult or impossible. Every step below is specifically about the **Base**
+  network (Chain ID `8453`) — double-check this before sending anything.
+</Warning>
+
+---
+
+## Getting Funded
+
+<Steps>
+  <Step title="Get your wallet address">
+    Open your wallet (the [Desktop App](/native-path/desktop-app)'s Wallet tab, or
+    MetaMask if you're using the [Provider](/native-path/provider) or headless paths)
+    and copy your address, or use its **Receive** QR code.
+  </Step>
+
+  <Step title="Get ETH onto Base">
+    Two common paths, depending on what you already hold:
+
+    - **Buying fresh:** several major exchanges support withdrawing ETH directly to
+      the Base network — check your exchange's withdrawal screen for a "Base" network
+      option before withdrawing. If it's offered, this is the simplest path: no
+      bridging step required.
+    - **Bridging existing ETH from Ethereum mainnet:** use the official Base Bridge at
+      [bridge.base.org](https://bridge.base.org). Connect your wallet, choose ETH,
+      and follow the on-screen flow. Bridging takes a few minutes and costs a small
+      gas fee on the source chain.
+
+    <Warning>
+      Only ever use **bridge.base.org** directly, typed by hand or from a bookmark —
+      never a link from a DM, ad, or search result. Phishing clones of legitimate
+      bridges are common enough that this is worth being deliberate about.
+    </Warning>
+  </Step>
+
+  <Step title="Get MOR onto Base">
+    MOR is an ERC-20 token on Base. Once you have a small amount of Base ETH for gas,
+    you can swap for MOR on a Base-network decentralized exchange, or check
+    [mor.org](https://mor.org)'s **Buy MOR** link for a current recommended venue.
+
+    <Warning>
+      **Verify the token contract and network before swapping, every time.** Token
+      swap tools sometimes default to the wrong chain, or list impostor tokens with
+      the same name. Cross-check the MOR contract address against
+      [nodedocs.mor.org/get-started/networks-and-tokens](https://nodedocs.mor.org/get-started/networks-and-tokens)
+      before confirming any swap, and confirm your wallet is set to the **Base**
+      network (Chain ID `8453`) — not Ethereum mainnet or Arbitrum — before you swap
+      or send anything. A handful of older Morpheus-ecosystem links and pages predate
+      the network's move to Base and still reference other chains; when a link and
+      the networks-and-tokens reference disagree, trust the reference page.
+    </Warning>
+  </Step>
+
+  <Step title="Send both to your Morpheus wallet">
+    If you bought or swapped in a different wallet or exchange account, send both
+    assets to the address from Step 1.
+
+    - Send a small test amount first if you've never sent to this address before.
+    - Double-check the address character-by-character — crypto sends are irreversible.
+    - Confirm the network selected for the send is **Base** on both ends.
+  </Step>
+
+  <Step title="Verify it arrived">
+    Check your Wallet tab (Desktop App) or look up your address directly at
+    [basescan.org](https://basescan.org) — search
+    `basescan.org/address/<your-wallet-address>` to see the transaction land in real
+    time.
+  </Step>
+</Steps>
+
+---
+
+## How Much Do You Actually Need?
+
+Less than you might think for MOR, and very little for ETH — but the honest answer
+depends on how Morpheus's staking mechanics work, which is easy to misjudge if you're
+budgeting based on "how much will I use" rather than "how much gets locked at once."
+
+That's covered in full, with real on-chain numbers, in
+[Understanding Session Economics](/native-path/understanding-session-economics) — read
+that before assuming you need a large balance. For a live calculator, see
+[tech.mor.org/calc.html](https://tech.mor.org/calc.html).
+
+<Tip>
+  **Don't want to deal with any of this?** The [API Gateway path](/api-gateway/windows)
+  doesn't require a wallet, MOR, or ETH at all — it's a hosted, credit-based
+  alternative if acquiring crypto isn't something you want to do right now.
+</Tip>
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause |
+|---|---|
+| I sent funds but they're not showing up | Almost always a wrong network — confirm both the send and your wallet were on Base, not Ethereum mainnet or Arbitrum. Check the transaction on basescan.org using the address, not just the app's balance readout. |
+| The exchange doesn't list a "Base" withdrawal option | Withdraw to Ethereum mainnet instead, then bridge via bridge.base.org — slower and costs extra gas, but works with any exchange. |
+| I'm not sure I have the real MOR token | Cross-check the contract address against [nodedocs.mor.org/get-started/networks-and-tokens](https://nodedocs.mor.org/get-started/networks-and-tokens) before trusting a balance in an unfamiliar wallet view or swap tool. |
+| Can I pay with a credit card instead? | Not for the Native path directly. The [API Gateway path](/api-gateway/windows) uses card/credit-based billing instead of MOR — consider that path if you'd rather avoid crypto acquisition entirely. |
+
+---
+
+## Glossary
+
+- **Base** — the Ethereum-compatible network Morpheus's contracts run on (Chain ID
+  `8453`). Distinct from Ethereum mainnet and from Arbitrum.
+- **Bridge** — a tool that moves an asset from one blockchain network to another.
+- **Gas** — the small fee paid in ETH for any on-chain transaction.
+- **ERC-20** — the token standard MOR follows on Base.

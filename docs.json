@@ -18,13 +18,20 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["index"]
+            "pages": ["what-is-morpheus", "index"]
           }
         ]
       },
       {
         "tab": "Native Path",
         "groups": [
+          {
+            "group": "Prerequisites",
+            "pages": [
+              "native-path/wallet-setup",
+              "native-path/funding-your-wallet"
+            ]
+          },
           {
             "group": "Concepts",
             "pages": ["native-path/understanding-session-economics"]
@@ -53,6 +60,10 @@
               "api-gateway/macos",
               "api-gateway/ubuntu"
             ]
+          },
+          {
+            "group": "IDE Integrations",
+            "pages": ["api-gateway/vscode"]
           }
         ]
       }

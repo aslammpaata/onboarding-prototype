@@ -1,0 +1,132 @@
+---
+title: "What Is Morpheus?"
+description: "A two-minute plain-language explainer, for before you pick a path."
+audience: ["beginner", "newcomer"]
+---
+
+**Read this if:** you landed here from a link, a friend, or a search, and every other
+page on this site already assumes you know what a "session," a "provider," or "MOR"
+is.
+
+**Skip this if:** you already know what Morpheus is and just want to get started —
+head straight to [Get Started](/).
+
+---
+
+## In One Sentence
+
+Morpheus is a marketplace where people with spare computer hardware ("providers") sell
+AI inference directly to people who want to run AI models ("consumers") — with no
+single company sitting in the middle, running the servers, or deciding who gets access.
+
+Think of it less like "an AI company" and more like a **classifieds board for AI
+compute**, coordinated automatically by code instead of a company's back office.
+
+---
+
+## Why Not Just Use ChatGPT?
+
+You can, and for a lot of everyday use, that's a perfectly reasonable choice. Morpheus
+exists for the situations where a single company owning the servers, the model, and
+the terms of access is exactly the problem:
+
+- **No single point of failure.** Providers are independent computers all over the
+  world, not one company's data center. If one provider goes offline, others are still
+  serving the same models.
+- **No single point of control.** Nobody can quietly change the terms, throttle you,
+  or cut off access, because no single party operates the whole system.
+- **Competitive pricing, set by a market.** Providers compete for your business on
+  price and reliability instead of one company setting a fixed rate.
+- **Open participation on both sides.** Anyone with spare compute can plug in and
+  start earning; anyone can consume without signing an enterprise contract with a
+  single vendor.
+
+None of this makes Morpheus strictly *better* for every use case — it makes it
+different, in ways that matter if decentralization, resilience, or open participation
+are things you actually care about.
+
+---
+
+## The Two Sides of the Marketplace
+
+<CardGroup cols={2}>
+  <Card title="Consumers" icon="comments">
+    People and applications that want AI inference — chat, coding help, agents,
+    anything you'd normally get from an AI API.
+  </Card>
+  <Card title="Providers" icon="server">
+    People running the actual model-serving hardware — anything from a home GPU to a
+    rented cloud server — who get paid for the compute they contribute.
+  </Card>
+</CardGroup>
+
+These two sides don't find and pay each other directly. They're matched and settled by
+smart contracts running on **Base** (a low-fee Ethereum network) — so "who gets paid,
+how much, and when" is enforced by code that anyone can inspect, not by a company's
+internal billing system.
+
+---
+
+## Where MOR Fits In
+
+**MOR** is the token that makes the marketplace work. At a very high level:
+
+| If you're a... | MOR is... |
+|---|---|
+| Consumer | What you stake to open a session and access a provider's model |
+| Provider | What you earn for serving inference, and what you stake to list your compute |
+
+<Note>
+  MOR shows up in two genuinely different systems that are easy to conflate: **paying
+  for and earning from inference** (what this page is about), and **staking MOR into
+  the Capital contract for protocol emissions** (a separate DeFi-style yield mechanism,
+  unrelated to running or using a node). This site focuses entirely on the first one —
+  see [gitbook.mor.org](https://morpheusai.gitbook.io/morpheus) if you're looking for
+  the tokenomics/emissions side.
+</Note>
+
+If you open a session and watch a MOR balance drop by a lot more than the price you
+expected, that's not a bug — it's a refundable deposit, not a payment. The
+[Understanding Session Economics](/native-path/understanding-session-economics) page
+walks through exactly how that works, with real on-chain examples.
+
+---
+
+## Two Ways to Actually Use It
+
+You don't have to touch a wallet or hold any MOR to try Morpheus. There are two
+genuinely different paths, and picking the right one up front saves you from setup
+you don't need:
+
+| | API Gateway | Native P2P |
+|---|---|---|
+| What it is | A hosted, OpenAI-compatible API to the marketplace | Running the actual peer-to-peer client yourself |
+| Wallet required | No | Yes |
+| Best for | Trying it fast, or plugging into an app/agent | The full decentralized experience, direct provider access |
+
+If you're still deciding, the [Get Started](/) page walks through both in more depth
+with a full comparison table.
+
+---
+
+## A Few Terms You'll See Everywhere
+
+- **Session** — a time-boxed window where you're connected to a specific provider's
+  model.
+- **Stake / escrow** — MOR locked to guarantee a session's cost — refundable, not
+  spent.
+- **Provider** — whoever's hardware is actually running the model you're talking to.
+- **Base** — the Ethereum-compatible network Morpheus's contracts run on. Not the same
+  network as Ethereum mainnet or Arbitrum — addresses and tokens don't carry over
+  between them.
+
+---
+
+<CardGroup cols={2}>
+  <Card title="I just want to use AI" icon="bolt" href="/api-gateway/windows">
+    Skip the wallet entirely — get an API key and start with the **API Gateway path**.
+  </Card>
+  <Card title="I want the full decentralized experience" icon="network-wired" href="/native-path/desktop-app">
+    Set up a wallet and run the network directly with the **Native P2P path**.
+  </Card>
+</CardGroup>

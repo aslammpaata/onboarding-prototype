@@ -20,7 +20,12 @@ These guides cover creating a Morpheus Inference API key, installing OpenClaw an
 
 ### Native P2P
 
-Use the Native Path if you want to run Morpheus locally and access the network directly. The available guides cover:
+Use the Native Path if you want to run Morpheus locally and access the network directly. Before the setup guides, two prerequisite pages cover what every one of them assumes is already done:
+
+- Wallet Setup & Seed Phrase Safety: creating/recovering a wallet and backing it up safely
+- Getting MOR & ETH on Base: acquiring and bridging both assets onto the Base network
+
+The setup guides themselves cover:
 
 - Desktop App: beginner-friendly setup with a graphical interface
 - `morctl`: command-line sessions and inference
@@ -33,18 +38,23 @@ The native path requires a funded wallet with MOR and Base ETH. Provider setup a
 
 ```text
 docs.json                         Mintlify navigation and site configuration
+what-is-morpheus.mdx              Plain-language newcomer explainer
 index.mdx                         Landing page and path comparison
-api-gateway/                      OpenClaw and EverClaw setup guides
+api-gateway/                      OpenClaw and EverClaw setup guides, IDE integrations
   windows.mdx
   macos.mdx
   ubuntu.mdx
+  vscode.mdx
 native-path/                      Native P2P setup guides
+  wallet-setup.mdx
+  funding-your-wallet.mdx
+  understanding-session-economics.mdx
   desktop-app.mdx
   morctl.mdx
   headless-developer.mdx
   provider.mdx
 logo/                             Light and dark site logos
-docs/testing/                     Test reports and draft material
+docs/                             Internal test reports and editorial notes (not published)
 ```
 
 ## Local Development
@@ -95,7 +105,5 @@ Then open `http://localhost:3000` in a browser.
 ## Current Status
 
 This is a local or free-hosted prototype for internal review. Content and screenshots are still being finalized. The macOS screenshots and a separate Morpheus P2P Inference in OpenClaw operations guide are known in-progress items.
-
-The VS Code / Cline material under `docs/testing/Using_Morpheus_in_VS_Code.md` is an unconverted draft. It is not currently part of the Mintlify navigation.
 
 For technical reference, see [nodedocs.mor.org](https://nodedocs.mor.org). For API reference, see [apidocs.mor.org](https://apidocs.mor.org/).

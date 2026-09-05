@@ -12,8 +12,19 @@ nodedocs.mor.org = technical reference, morlord.com = analytics). This prototype
 should **not** duplicate nodedocs' technical content — it's the "how do I start"
 layer, journey-driven, screenshot/video-heavy.
 
-**Status:** local/free-hosted prototype only. No production domain or deployment
-decisions yet — those sit with US leadership, out of scope for this work.
+**Status:** deployed for internal review at https://morpheus-asia.mintlify.site/ on
+Mintlify's free Starter tier, auto-deploying from `master` on every push. This is
+**not access-controlled** — Starter has no password/SSO auth, only "Mintlify auth"
+(Pro, $450–540/mo, is required for real password protection). The URL is unlisted
+and "Don't index project" is enabled in the dashboard (noindex + robots.txt
+disallow) so it won't surface via search, but anyone with the link can view it —
+share it only directly with staff, never in a public/crawlable channel. This is a
+deliberate, time-boxed trade-off for the review stage, not a real access-control
+decision. No production domain or deployment decisions have been made — those sit
+with US leadership, out of scope for this work. See the research behind this
+choice for the full comparison of hosting options and why Vercel/Netlify/Cloudflare
+Pages/GitHub Pages aren't viable alternatives (Mintlify has no static-export path
+outside an Enterprise agreement).
 
 ## Structure
 

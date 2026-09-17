@@ -41,7 +41,8 @@
             "pages": [
               "native-path/desktop-app",
               "native-path/morctl",
-              "native-path/headless-developer"
+              "native-path/headless-developer",
+              "native-path/cnode-docker-setup"
             ]
           },
           {

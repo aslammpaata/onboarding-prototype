@@ -1,0 +1,649 @@
+---
+title: "Native Path: C-Node Setup (Docker)"
+description: "Run a Morpheus consumer node in Docker with keychain-based wallet injection, on-chain sessions, and optional OpenClaw integration."
+audience: ["developer", "operator"]
+last_verified: "v7.11.0 — image, .env variables, API shapes and marketplace model names re-verified against the upstream repo and active.mor.org on 2026-09-16"
+---
+
+# Native Path: C-Node Setup (Docker)
+
+This guide walks through running a Morpheus **consumer node** (C-Node) inside a Docker
+container, injecting a wallet via the OS keychain, opening on-chain sessions, and
+running inference. It also covers wiring the C-Node into an OpenClaw gateway as a
+provider.
+
+**When to use this guide:** you want a reproducible, containerised Morpheus setup with
+no binary downloads, no GUI dependencies, and the private key kept out of plaintext
+files. If you prefer a binary-only setup with raw `curl`, use the
+[Headless / Developer guide](/native-path/headless-developer) instead — the two guides
+share the same API calls and session lifecycle; only the packaging differs.
+
+**What you'll do:** pull the Docker image → configure `.env` → store your private key
+in the OS keychain → start the node → verify wallet and allowance → open a session →
+run inference → understand session lifecycle → (optional) wire into OpenClaw.
+
+Covers **macOS (Apple Silicon)** and **Linux x86_64** — the concepts are identical,
+only the shell syntax and keychain tool differ.
+
+---
+
+## Before You Start
+
+**What this is, in one sentence:** running a Morpheus C-Node (the Lumerin
+`proxy-router`) inside Docker, with the wallet key stored in the OS keychain rather
+than in a file you have to protect.
+
+**What you'll need:**
+- **macOS:** Docker Desktop (or colima), the built-in `security` CLI, `jq` (`brew install jq`).
+- **Linux:** Docker Engine, `secret-tool` (`apt install libsecret-tools` or
+  `dnf install libsecret`), `jq`.
+- A funded wallet on **Base mainnet** with enough MOR for the escrow of the session
+  you intend to open, plus a small amount of **ETH for gas** (~$1 covers hundreds of
+  session transactions at current Base gas prices). For orientation: a 24-hour
+  session was observed to need roughly **200 MOR** (DeepSeek V4 Flash) to
+  **1,400 MOR** (GLM 5.2) of escrow in September 2026 — but escrow tracks the
+  provider's bid price, so check the calculator at
+  [tech.mor.org/calc.html](https://tech.mor.org/calc.html) for the model you want.
+- *(Optional)* `cast` from [Foundry](https://book.getfoundry.sh/getting-started/installation)
+  if you want to cross-check balances directly on-chain. Everything in this guide can
+  be done through the C-Node's own API without it.
+
+<Note>
+  Not sure how much MOR you need? Session economics (escrow, cost, on-hold queue) are
+  explained in detail in [Understanding Session Economics](/native-path/understanding-session-economics).
+  The short version: you stake a large escrow (~338× the per-second cost) at session open,
+  and it comes back to you only after a waiting period following close — not immediately.
+  Size your capital for the **gross float**, not a single session.
+</Note>
+
+If you don't have MOR and ETH on Base yet, see
+[Getting MOR & ETH on Base](/native-path/funding-your-wallet) first.
+
+---
+
+## Security Considerations
+
+<Warning>
+  **You'll be handling a real private key.** This guide uses the OS keychain
+  (macOS Keychain / Linux Secret Service) to store it — the key is never written to
+  the `.env` file you keep on disk, never passed as a CLI argument, and never appears
+  in your shell history. If you bypass the keychain pattern, you accept the risk of
+  key exposure in logs, backups, and container filesystems.
+</Warning>
+
+**Where the key lives while the node runs — read this before relying on the wrapper
+script.** The keychain pattern protects the key *at rest*. It does not, and cannot,
+make the key inaccessible on a machine where the container is running:
+
+- The `proxy-router` binary reads `/app/.env` with `godotenv.Load`, which copies every
+  variable into its own process environment. For as long as the container runs, the
+  key is present in the environment of PID 1 inside the container and in the
+  process's memory (it has to be — the node signs transactions with it).
+- **`docker inspect morpheus-cnode` does not show the key.** The wrapper script injects
+  it via a mounted file, not `-e`/`--env-file`, so it never enters the container's
+  recorded config. `inspect` only shows the (already deleted) temp-file path under
+  `Mounts`.
+- **`docker exec morpheus-cnode env` fails**, but only because the image is built
+  `FROM scratch` — there is no shell or `env` binary inside it. That is an accident of
+  the image, not a security control.
+- **Anyone with Docker-socket or root access on the host can still read the key** from
+  the live process, for example with
+  `docker run --rm --pid=container:morpheus-cnode busybox cat /proc/1/environ`, or on a
+  Linux host by reading `/proc/<container-pid>/environ` as root. Treat Docker-socket
+  access as equivalent to holding the key.
+- After the wrapper script shreds the host temp file, the mounted `/app/.env` inside
+  the container is emptied (Linux) or gone (macOS). The key is **not** persisted into
+  the `/app/data` volume: with `WALLET_PRIVATE_KEY` set, the router uses its
+  non-persisting env wallet (it logs `Using env wallet. Private key persistance
+  unavailable` at startup). The startup config dump in `docker logs` is sanitized
+  and omits the key.
+- Secure deletion of the temp files is best-effort. On macOS APFS (copy-on-write) and
+  on SSDs generally, `shred`/`rm -P` cannot guarantee the bytes are unrecoverable; the
+  temp file exists only for the seconds between container start and shredding.
+
+**Net effect:** the pattern keeps the key out of your dotfiles, backups, shell history
+and Docker metadata. It does not protect you from a compromised or shared Docker host.
+Run the C-Node on a machine you control, with Docker-socket access limited to you.
+
+---
+
+## Walkthrough
+
+<Steps>
+  <Step title="Pull the Docker Image">
+    The C-Node is the Lumerin `proxy-router`, published as a multi-arch
+    (`linux/amd64` + `linux/arm64`) image on GitHub Container Registry alongside each
+    release:
+
+    ```bash
+    docker pull ghcr.io/morpheusais/morpheus-lumerin-node:v7.11.0
+    ```
+
+    <Warning>
+      Always pin a specific version tag — never use `:latest`. The Morpheus protocol
+      undergoes breaking changes between major versions (session ABI, event signatures,
+      stake-claim mechanics). Check the
+      [releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
+      for the current version — each release's notes include the exact `docker pull`
+      line. This guide was verified against `v7.11.0` (released 2026-09-09). Avoid any
+      `-test`-suffixed tag unless you specifically want the testnet build.
+    </Warning>
+
+    **Image pulled.**
+  </Step>
+
+  <Step title="Create the Data Directory and .env File">
+    The C-Node reads its configuration from a `.env` file in its working directory
+    (`/app` inside the container); the wrapper script in Step 4 mounts it there
+    read-only. Create a dedicated data directory and the env file:
+
+    ```bash
+    mkdir -p $HOME/morpheus-data
+
+    cat > $HOME/morpheus-data/proxy-router.env << 'EOF'
+    # --- Blockchain ---
+    ETH_NODE_ADDRESS=<YOUR_BASE_RPC_URL>
+    ETH_NODE_CHAIN_ID=8453
+    DIAMOND_CONTRACT_ADDRESS=0x6aBE1d282f72B474E54527D93b979A4f64d3030a
+    MOR_TOKEN_ADDRESS=0x7431aDa8a591C955a994a21710752EF9b882b8e3
+    BLOCKSCOUT_API_URL=https://base.blockscout.com/api/v2
+    ENVIRONMENT=production
+
+    # --- Wallet ---
+    # Left blank: the key is injected at runtime via the keychain (Step 4).
+    # Never paste a private key into this file.
+    WALLET_PRIVATE_KEY=
+
+    # --- Router ---
+    MODELS_CONFIG_PATH=./data/models-config.json
+    COOKIE_FILE_PATH=./data/.cookie
+    AUTH_CONFIG_FILE_PATH=./data/auth-config.json
+    RATING_CONFIG_PATH=./data/rating-config.json
+    PROXY_STORAGE_PATH=./data/
+
+    # --- Network ---
+    WEB_ADDRESS=0.0.0.0:8082
+    PROXY_ADDRESS=0.0.0.0:3333
+    WEB_PUBLIC_URL=http://localhost:8082
+
+    # --- IPFS (disabled for consumer nodes) ---
+    IPFS_DISABLED=true
+    EOF
+    ```
+
+    <Note>
+      **`ETH_NODE_ADDRESS`** — you can use a free public RPC (`https://mainnet.base.org`)
+      or a paid endpoint (Alchemy, DRPC, etc.). A paid RPC is strongly recommended for
+      production: the C-Node makes frequent `eth_getLogs` and `eth_call` queries during
+      session operations, and free RPCs rate-limit aggressively. Store the RPC URL in
+      your keychain too if it contains an API key.
+
+      **`BLOCKSCOUT_API_URL`** must be the **v2** API base (`…/api/v2`) — the router
+      appends `/addresses/…` paths to it and the v1 base will not work.
+    </Note>
+
+    <Tip>
+      **`models-config.json`** is for *local* model backends (what a provider node
+      serves) — a consumer node doesn't need one. If the file is missing the router logs
+      a warning and continues with an empty local model list; marketplace models are
+      discovered from the chain regardless. Creating an empty one just silences the
+      warning:
+      ```bash
+      echo '{"models": []}' > $HOME/morpheus-data/models-config.json
+      ```
+      `auth-config.json` and `rating-config.json` are likewise optional — the router
+      creates or defaults them.
+    </Tip>
+
+    **Config file ready.**
+  </Step>
+
+  <Step title="Store Your Private Key in the OS Keychain">
+    Instead of putting your private key in the `.env` file, store it in the OS keychain.
+    The wrapper script in Step 4 retrieves it at startup.
+
+    **macOS (Keychain):**
+    ```bash
+    # Store the key — you'll be prompted once; it's never echoed or logged
+    read -rs PK
+    security add-generic-password -a "$USER" -s "morpheus-wallet-key" -w "$PK" -U
+    unset PK
+    ```
+
+    **Linux (Secret Service / libsecret):**
+    ```bash
+    read -rs PK
+    secret-tool store --label="Morpheus Wallet" \
+      service morpheus-wallet-key username "$USER" <<< "$PK"
+    unset PK
+    ```
+
+    <Warning>
+      After storing the key, verify retrieval works:
+      ```bash
+      # macOS:
+      security find-generic-password -a "$USER" -s "morpheus-wallet-key" -w
+      # Linux:
+      secret-tool lookup service morpheus-wallet-key username "$USER"
+      ```
+      This prints the key to your terminal — clear the screen afterwards. The
+      `read -rs` pattern above keeps the key itself out of shell history, but if you
+      ever typed it on a command line directly, remove that entry:
+      ```bash
+      history -d $(history 1 | awk '{print $1}')  # or clear the relevant line
+      ```
+    </Warning>
+
+    **Key stored in the OS keychain.**
+  </Step>
+
+  <Step title="Start the C-Node Container">
+    Create a wrapper script that retrieves the key from the keychain, injects it into
+    the container via a short-lived temp file, waits until the router has read it,
+    then destroys the temp files:
+
+    ```bash
+    cat > $HOME/morpheus-data/start-cnode.sh << 'SCRIPT'
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    DATA_DIR="$HOME/morpheus-data"
+    IMAGE="ghcr.io/morpheusais/morpheus-lumerin-node:v7.11.0"
+
+    # Retrieve the private key from the OS keychain
+    if command -v security &>/dev/null; then
+      # macOS
+      PK=$(security find-generic-password -a "$USER" -s "morpheus-wallet-key" -w)
+    elif command -v secret-tool &>/dev/null; then
+      # Linux
+      PK=$(secret-tool lookup service morpheus-wallet-key username "$USER")
+    else
+      echo "ERROR: No keychain tool found. Install security (macOS) or secret-tool (Linux)." >&2
+      exit 1
+    fi
+
+    # Build a temporary env file = your on-disk .env + the key, mode 600
+    CONTAINER_ENV_FILE=$(mktemp)
+    chmod 600 "$CONTAINER_ENV_FILE"
+    cp "$DATA_DIR/proxy-router.env" "$CONTAINER_ENV_FILE"
+    printf 'WALLET_PRIVATE_KEY=%s\n' "$PK" >> "$CONTAINER_ENV_FILE"
+    unset PK
+
+    cleanup() {
+      # Best-effort secure delete (shred on Linux, rm -P on macOS)
+      shred -u "$CONTAINER_ENV_FILE" 2>/dev/null || rm -P "$CONTAINER_ENV_FILE" 2>/dev/null || rm -f "$CONTAINER_ENV_FILE"
+    }
+    trap cleanup EXIT
+
+    # Replace any previous instance (the old one's mount source no longer exists)
+    docker rm -f morpheus-cnode >/dev/null 2>&1 || true
+
+    docker run -d \
+      --name morpheus-cnode \
+      --restart no \
+      -p 127.0.0.1:8082:8082 \
+      -v "$CONTAINER_ENV_FILE:/app/.env:ro" \
+      -v "$DATA_DIR:/app/data" \
+      "$IMAGE"
+
+    # Wait until the router has actually read the key before destroying the file.
+    # "Using env wallet" is logged as soon as WALLET_PRIVATE_KEY has been consumed.
+    for _ in $(seq 1 30); do
+      if docker logs morpheus-cnode 2>&1 | grep -q "Using env wallet"; then
+        echo "C-Node started; wallet key consumed. Cleaning up temp env file."
+        exit 0
+      fi
+      sleep 1
+    done
+    echo "WARNING: did not see 'Using env wallet' within 30s — check 'docker logs morpheus-cnode'. Temp env file removed anyway." >&2
+    exit 1
+    SCRIPT
+
+    chmod +x $HOME/morpheus-data/start-cnode.sh
+    $HOME/morpheus-data/start-cnode.sh
+    ```
+
+    Then follow the log until the node is up:
+
+    ```bash
+    docker logs -f morpheus-cnode
+    # Look for: "Using env wallet", then your wallet address and MOR/ETH balances
+    ```
+
+    <Note>
+      **Why `--restart no`, and why the script removes the old container first.** The
+      key is delivered through a bind-mounted temp file that the script deletes
+      seconds after start. If Docker later restarted the container on its own (after a
+      crash, daemon restart or host reboot), it would try to re-mount a file that no
+      longer exists and the node would come up without its configuration. So restarts
+      are deliberately manual: **to restart the node, just re-run
+      `$HOME/morpheus-data/start-cnode.sh`** — it removes the old container, fetches the
+      key from the keychain again, and starts fresh. Your session storage in
+      `$HOME/morpheus-data` survives across restarts.
+
+      The container mounts your data directory at `/app/data` and the merged env file
+      at `/app/.env` read-only. Once the script exits, the key exists only in the
+      running process's memory and environment — see
+      [Security Considerations](#security-considerations) for exactly what that does and
+      doesn't protect against.
+    </Note>
+
+    **C-Node is running with a real, funded wallet, key sourced from the keychain.**
+  </Step>
+
+  <Step title="Verify Wallet, Balances and Allowance">
+    Before opening a session, confirm the C-Node loaded the right wallet and can see
+    your balances. All of these go through the C-Node's own API, authenticated with the
+    auto-generated `.cookie` credential:
+
+    ```bash
+    COOKIE="$(cat $HOME/morpheus-data/.cookie)"
+
+    # Which wallet did the node load?
+    curl -s http://localhost:8082/wallet -u "$COOKIE" | jq .
+    # → {"address": "0x..."}
+
+    # MOR and ETH balance as seen by the node (values in wei)
+    curl -s http://localhost:8082/blockchain/balance -u "$COOKIE" | jq .
+    # → {"eth": ..., "mor": ...}
+    ```
+
+    Now set a large ERC-20 allowance for the Diamond contract (one-time). Without it,
+    session opens will eventually fail with `ERC20: insufficient allowance` — the
+    "allowance ratchet" problem where each session consumes approval. The node signs
+    this transaction with the wallet it already holds, so you never handle the key:
+
+    ```bash
+    # Check current allowance
+    curl -s "http://localhost:8082/blockchain/allowance?spender=0x6aBE1d282f72B474E54527D93b979A4f64d3030a" \
+      -u "$COOKIE" | jq .
+
+    # Approve (amount in wei — this example is 100,000 MOR; use 2^256-1 for unlimited)
+    curl -s -X POST \
+      "http://localhost:8082/blockchain/approve?spender=0x6aBE1d282f72B474E54527D93b979A4f64d3030a&amount=100000000000000000000000" \
+      -u "$COOKIE" | jq .
+    # → {"tx": "0x..."}
+    ```
+
+    <Warning>
+      A large or unlimited allowance is standard practice for protocol contracts you
+      interact with repeatedly. The Diamond is the Morpheus protocol's own
+      session/staking contract — the same trust boundary as the escrow it already holds.
+      If you'd rather cap exposure, approve a bounded amount and re-approve when it runs
+      low.
+    </Warning>
+
+    <Tip>
+      **Optional on-chain cross-check with `cast`** (read-only, no key needed):
+      ```bash
+      cast call 0x7431aDa8a591C955a994a21710752EF9b882b8e3 \
+        "balanceOf(address)(uint256)" <WALLET_ADDRESS> --rpc-url <YOUR_BASE_RPC_URL>
+      cast balance <WALLET_ADDRESS> --rpc-url <YOUR_BASE_RPC_URL>
+      ```
+    </Tip>
+
+    **Wallet verified, allowance set.**
+  </Step>
+
+  <Step title="Open a Session">
+    List available marketplace models, then open a session against one by its
+    **model ID** (the `0x…` hash), not its name:
+
+    ```bash
+    # List models from the Morpheus marketplace
+    curl -s http://localhost:8082/blockchain/models -u "$COOKIE" \
+      | jq '.models[] | {id, name}'
+
+    # Open a 600-second session (minimum recommended duration)
+    curl -s -X POST \
+      "http://localhost:8082/blockchain/models/<MODEL_ID>/session" \
+      -H 'Content-Type: application/json' \
+      -u "$COOKIE" \
+      -d '{"sessionDuration": 600, "failover": true, "directPayment": false}'
+    ```
+
+    The response includes a `sessionID`:
+    ```json
+    {"sessionID": "0xa3e0ac1a374208b4420d84af96a2f7b27b34d5bbe742be9f8c656"}
+    ```
+
+    <Note>
+      **Model names are not unique.** Names are free-form strings set by whoever
+      registered the model on-chain, and the same name (e.g. `glm-5.2`,
+      `deepseek-v4-flash`) currently appears under several different model IDs
+      registered by different owners, each with its own set of provider bids. Always
+      select by ID. `GET /blockchain/models/<MODEL_ID>/bids/rated` shows the ranked
+      provider bids for a given model before you commit MOR to it.
+    </Note>
+
+    <Tip>
+      **Use 600 seconds (10 minutes) as the minimum session duration.** Shorter sessions
+      (e.g. 400s) may work with some providers but can fail with others due to
+      marketplace timing constraints. 600s is a safe floor observed across multiple
+      providers. For production use, consider 24-hour sessions (86400 seconds) to
+      minimise churn — but this requires significantly more MOR capital upfront.
+    </Tip>
+
+    **Session open, MOR escrow staked.**
+  </Step>
+
+  <Step title="Run Inference">
+    ```bash
+    curl -s -X POST 'http://localhost:8082/v1/chat/completions' \
+      -H 'Content-Type: application/json' \
+      -H "session_id: <SESSION_ID>" \
+      -u "$COOKIE" \
+      -d '{"messages": [{"role": "user", "content": "Hello. Tell me about AI."}]}' \
+      | jq .
+    ```
+
+    The API is OpenAI-compatible — any client that speaks the OpenAI Chat Completions
+    API can talk to the C-Node directly by setting `base_url` to
+    `http://localhost:8082/v1` and passing the session ID as a `session_id` header.
+    For multi-turn memory via the optional `chat_id` header, see the
+    [Headless / Developer guide](/native-path/headless-developer) — it works
+    identically here.
+
+    **Inference working.**
+  </Step>
+
+  <Step title="Session Lifecycle — What Happens Next">
+    <Warning>
+      **Closing a session does NOT return the escrow principal immediately.**
+      This is the single most important economic fact about Morpheus sessions, and it
+      is current platform behaviour, not a bug in your setup.
+    </Warning>
+
+    When a session closes (either manually or by natural expiry):
+    1. **The used stipend** (cost = bid_pricePerSecond × duration) is consumed — paid
+       to the provider by the protocol treasury.
+    2. **A small stipend surplus** (~5–10 MOR for a 24h session) returns to your wallet
+       immediately. This is the unused portion of the stipend generated by your stake.
+    3. **The escrow principal** (the large ~338× number) goes into an **on-hold queue**
+       on the Diamond contract. It does NOT return to your spendable balance.
+    4. After a protocol-determined waiting period (hours to days), the on-hold MOR
+       becomes claimable. You must call `withdrawUserStakes` to reclaim it.
+
+    Both the check and the claim are exposed by the C-Node's API, so again the node
+    signs with the wallet it already holds:
+
+    **Check your on-hold balance:**
+    ```bash
+    curl -s "http://localhost:8082/blockchain/stakes/onhold" -u "$COOKIE" | jq .
+    # → {"available": "<claimable now, wei>", "hold": "<still locked, wei>"}
+    ```
+
+    **Claim available stakes:**
+    ```bash
+    curl -s -X POST http://localhost:8082/blockchain/stakes/withdraw \
+      -H 'Content-Type: application/json' \
+      -u "$COOKIE" \
+      -d '{"iterations": 20}'
+    # → {"tx": "0x..."}
+    ```
+
+    `iterations` is how many on-hold entries the contract walks per call (the same
+    `uint8` argument the contract takes) — 20 is plenty for normal use.
+
+    <Tip>
+      Read-only cross-check with `cast`, if you want to see it straight from the
+      contract:
+      ```bash
+      cast call 0x6aBE1d282f72B474E54527D93b979A4f64d3030a \
+        "getUserStakesOnHold(address,uint8)(uint256,uint256)" \
+        <WALLET_ADDRESS> 20 --rpc-url <YOUR_BASE_RPC_URL>
+      # Returns: (available_now, total_on_hold) in wei
+      ```
+    </Tip>
+
+    <Note>
+      For a full explanation of session costs, escrow sizing, the on-hold queue, and
+      capital float requirements, see
+      [Understanding Session Economics](/native-path/understanding-session-economics).
+    </Note>
+
+    **Don't close sessions early** unless you have a reason to — the escrow goes
+    on-hold regardless of when you close.
+  </Step>
+
+  <Step title="Wire into OpenClaw (Optional)">
+    If you run an OpenClaw gateway, you can wire the C-Node as a model provider. The
+    C-Node's API is OpenAI-compatible, so OpenClaw can route to it directly.
+
+    Add a provider entry to your `openclaw.json`:
+
+    ```json
+    {
+      "morpheus-node": {
+        "baseUrl": "http://127.0.0.1:8082/v1",
+        "apiKey": "morpheus-local",
+        "api": "openai-completions",
+        "timeoutSeconds": 480,
+        "models": [
+          {
+            "id": "glm-5.2",
+            "name": "GLM-5.2 (Morpheus P2P)",
+            "api": "openai-completions",
+            "reasoning": true,
+            "input": ["text"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 262144,
+            "contextTokens": 180000,
+            "maxTokens": 65536
+          },
+          {
+            "id": "deepseek-v4-flash",
+            "name": "DeepSeek V4 Flash (Morpheus P2P)",
+            "api": "openai-completions",
+            "input": ["text"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 131072,
+            "contextTokens": 56000,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+    ```
+
+    <Note>
+      **Available models.** The marketplace roster changes as providers join and leave;
+      the live list is at
+      [active.mor.org/active_models.json](https://active.mor.org/active_models.json)
+      (447 registered models on 2026-09-16, of which these had healthy provider bids:
+      `deepseek-v4-flash`, `glm-5.2`, `kimi-k3`, `qwen3.8-max`, `Claude Sonnet 4.6`,
+      among many others). Two things to know when reading it:
+
+      - **Use the exact on-chain `Name`** (or better, the `Id`) — names are free-form,
+        so `qwen3.8-max` and `Claude Sonnet 4.6` are real entries while `qwen-3.8-max`
+        or `claude-sonnet-4.6` match nothing.
+      - **Proprietary models (Claude, GPT, Gemini, Grok…) on the P2P marketplace are
+        served by providers relaying to the vendor's hosted API**, not by open weights
+        running on the provider's hardware — the router's model config natively
+        supports `claudeai`/`openai` upstreams for exactly this. Your prompts therefore
+        transit the P2P provider *and* the upstream vendor. Choose accordingly for
+        sensitive workloads.
+
+      **`contextTokens`** is the usable prompt budget (roughly contextWindow / 1.2).
+      Set it conservatively — if the C-Node or provider truncates, OpenClaw's
+      compaction will kick in late and sessions will drop turns.
+
+      **`timeoutSeconds: 480`** (8 minutes) is a safe default for most models. Streaming
+      responses on Morpheus P2P can take 30–120s for the first token depending on
+      provider load. If you see frequent timeouts, increase to 600.
+
+      **`cost` is zero** — Morpheus sessions are pre-paid via escrow. There is no
+      per-token billing through the API.
+    </Note>
+
+    <Tip>
+      For production OpenClaw setups, consider running a lightweight session-management
+      proxy between OpenClaw and the C-Node. This proxy handles automatic session
+      rotation (open new before old expires), lane pooling (multiple concurrent models),
+      and in-request recovery (failover to a hosted provider if the P2P provider drops).
+      This is beyond the scope of this guide.
+    </Tip>
+
+    **OpenClaw routing inference through Morpheus P2P.**
+  </Step>
+</Steps>
+
+---
+
+## Troubleshooting
+
+| Symptom | Cause & Fix |
+|---|---|
+| `waiting for private key` in container logs | The keychain retrieval failed or returned empty — verify `security find-generic-password` or `secret-tool lookup` returns the key. On macOS the keychain must be unlocked. |
+| Script prints `did not see 'Using env wallet' within 30s` | The container started but hadn't read the env file in time, or crashed. Check `docker logs morpheus-cnode`; if it shows a config error, fix `proxy-router.env` and re-run the script. |
+| Node comes up with no config after a reboot | Expected — see the note in Step 4. Re-run `start-cnode.sh`; do not rely on Docker restart policies with this pattern. |
+| `docker: Conflict. The container name "/morpheus-cnode" is already in use` | You're running an older version of the script without the `docker rm -f` line. Run `docker rm -f morpheus-cnode` and retry. |
+| `insufficient MOR balance` on session open | Your wallet doesn't have enough liquid MOR for the escrow. Check `GET /blockchain/stakes/onhold` — MOR may be stuck in the on-hold queue. Claim it first, or top up the wallet. |
+| `ERC20: insufficient allowance` | You haven't set a large enough allowance. Run the `approve` call from Step 5. |
+| Session opens but inference times out | The P2P provider may be overloaded. Try a different model (or the same name under a different model ID), or increase `timeoutSeconds` in your client. Check `docker logs morpheus-cnode` for provider-side errors. |
+| Escrow didn't return after closing | Expected behaviour — the escrow goes to the on-hold queue, not your wallet. Wait for the claim window, then call `POST /blockchain/stakes/withdraw`. See [Understanding Session Economics](/native-path/understanding-session-economics). |
+| `401 Unauthorized` on API calls | The `.cookie` file may have regenerated. Re-read it: `cat $HOME/morpheus-data/.cookie`. |
+| Container starts but C-Node reports 0 MOR balance | Check that `ETH_NODE_ADDRESS` points to Base mainnet (chain ID 8453), not a testnet. Verify the wallet address in the logs matches your funded wallet. |
+| Docker image pull fails | Check architecture compatibility. The image is multi-arch (amd64 + arm64). If on Apple Silicon, ensure Docker Desktop's platform is set to `linux/arm64`. |
+| `IPFS` errors in container logs | Add `IPFS_DISABLED=true` to your `proxy-router.env` (consumer nodes don't need IPFS). |
+| Blockscout / transaction-history errors in logs | `BLOCKSCOUT_API_URL` must end in `/api/v2`, not `/api`. |
+
+---
+
+## Cross-Guide Reference
+
+- **[Understanding Session Economics](/native-path/understanding-session-economics)** —
+  escrow sizing, on-hold queue mechanics, capital float requirements, verified on-chain
+  examples.
+- **[Headless / Developer Setup](/native-path/headless-developer)** — binary-only setup
+  with raw `curl` calls (no Docker). Same session lifecycle, same economics.
+- **[morctl](/native-path/morctl)** — CLI tool that automates session management and
+  inference calls.
+- **[Getting MOR & ETH on Base](/native-path/funding-your-wallet)** — how to acquire MOR
+  and bridge ETH to Base.
+
+---
+
+## Glossary
+
+<Note>
+  Terms in **bold** are used throughout this guide and the Morpheus documentation.
+</Note>
+
+- **C-Node** — the Lumerin `proxy-router` running as a Docker container. Opens/closes
+  on-chain sessions, escrows MOR, routes inference requests to P2P providers.
+- **Diamond** — the Morpheus protocol contract (`0x6aBE1d282f72B474E54527D93b979A4f64d3030a`
+  on Base mainnet). Manages sessions, stakes, and the on-hold queue.
+- **Session** — a time-boxed window during which you can run inference against a model.
+  Has a start (openSession), end (closeSession or natural expiry), and an escrow.
+- **Escrow** — the large MOR stake locked at session open (~338× the per-second cost).
+  Goes to the **on-hold queue** on close, not back to your wallet immediately.
+- **On-hold queue** — MOR from closed sessions waiting to become claimable. Check with
+  `GET /blockchain/stakes/onhold`, claim with `POST /blockchain/stakes/withdraw`
+  (contract: `getUserStakesOnHold` / `withdrawUserStakes`).
+- **Stipend surplus** — the unused portion of the stipend generated by your stake.
+  Returns to your wallet immediately on close (small, ~5–10 MOR).
+- **`.cookie`** — the C-Node's auto-generated Basic Auth credential (`user:pass`).
+  Found at `$HOME/morpheus-data/.cookie`.
+- **`contextTokens`** — the usable prompt budget for a model (roughly
+  contextWindow / 1.2). Set in OpenClaw's model config to control compaction timing.

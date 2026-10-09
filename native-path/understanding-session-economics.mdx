@@ -48,6 +48,33 @@ Adoption matters in practice: if a client crashes or restarts while a session is
 open on-chain, a well-behaved client re-discovers and reuses it rather than opening a
 second one and stranding the first session's escrow.
 
+### The Flow, Visualized
+
+The confusing part isn't the steps — it's that MOR leaves your wallet on one path and
+comes back on **two different paths of wildly different size**. This is that flow:
+
+```mermaid
+flowchart LR
+    W["Your Wallet<br/>spendable MOR"]
+    O["Open Session<br/>escrows roughly 338x the session cost"]
+    A["Active Session<br/>inference is served"]
+    C["Close Session<br/>settles the small used cost"]
+    H["On-Hold Queue<br/>day-locked, not spendable yet"]
+    K["Withdraw User Stakes<br/>manual claim"]
+
+    W -->|escrow locked| O
+    O --> A
+    A --> C
+    C -->|small stipend back immediately| W
+    C -->|the rest of the escrow| H
+    H -->|released after hold period| K
+    K -->|claimed MOR| W
+```
+
+The top return path (**stipend**) is a rounding error next to the bottom one
+(**escrow, via the on-hold queue**) — see the real transaction amounts below to get a
+sense of just how lopsided that split actually is.
+
 ---
 
 ## What Happens When a Session Closes — Verified

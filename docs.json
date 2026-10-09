@@ -18,7 +18,7 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["what-is-morpheus", "index"]
+            "pages": ["what-is-morpheus", "index", "ecosystem"]
           }
         ]
       },

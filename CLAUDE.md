@@ -37,21 +37,45 @@ native-path/           Wallet Setup, Funding, Desktop App, morctl, Headless/Deve
 api-gateway/           Windows, macOS, Ubuntu OpenClaw+EverClaw setup guides, vscode.mdx
 ```
 
-## Content audit (2026-09-03) and Phase 1 follow-up
+## Content audit (2026-09-03) and roadmap progress
 
 A full content-gap audit against apidocs.mor.org and nodedocs.mor.org (83 official
 pages reviewed) found the official docs strong on technical depth but with almost no
 visuals (zero screenshots across all 63 nodedocs.mor.org pages) and three real content
 dead ends: no acquisition/bridging instructions for MOR/ETH on Base anywhere official,
 wallet/seed-phrase safety reduced to one sentence per install page, and no unified map
-of the ~13 mor.org-ecosystem properties. Phase 1 of the resulting roadmap is done:
-`what-is-morpheus.mdx`, `native-path/wallet-setup.mdx`,
-`native-path/funding-your-wallet.mdx`, and the converted `api-gateway/vscode.mdx` all
-exist and are wired into `docs.json` + cross-linked from `index.mdx`,
-`desktop-app.mdx`, `morctl.mdx`, and `provider.mdx`. Remaining phases (session-lifecycle
-diagram, ecosystem map page, zero-to-earning provider checklist, onboarding videos) are
-not yet started — see the audit artifact from that session for the full prioritized
-list if picking this back up.
+of the ~13 mor.org-ecosystem properties. Progress against the resulting roadmap:
+
+- **Phase 1 (done):** `what-is-morpheus.mdx`, `native-path/wallet-setup.mdx`,
+  `native-path/funding-your-wallet.mdx`, and the converted `api-gateway/vscode.mdx` —
+  wired into `docs.json` + cross-linked from `index.mdx`, `desktop-app.mdx`,
+  `morctl.mdx`, and `provider.mdx`.
+- **Phase 2 (done):** a Mermaid session-lifecycle diagram embedded in
+  `native-path/understanding-session-economics.mdx` (the wallet ↔ escrow ↔ on-hold
+  queue ↔ claim flow, visualizing what the page's on-chain examples already prove),
+  and a new `ecosystem.mdx` page — a Mermaid diagram + accordion reference mapping
+  all ~13 mor.org-family properties, since no official page does this. Both wired
+  into nav/cross-links; `mintlify broken-links` clean after each change.
+- **Video scripts (done, not yet recorded):** four full production scripts plus a
+  production-notes doc live under `docs/video-scripts/` — Desktop App first
+  inference, OpenClaw+EverClaw setup, Understanding Your Stake, and Provider
+  zero-to-payout. Recording priority, tooling, hosting/embedding approach (YouTube +
+  responsive iframe, matching apidocs.mor.org's existing pattern), and the
+  "never show a real seed phrase or private key on camera" rule are all in
+  `docs/video-scripts/00-production-notes.md`. **Do not add video embeds/placeholders
+  to the guide pages until a video is actually recorded** — this repo already
+  regretted doing that once with screenshot placeholders (see Known content gaps,
+  below); the intended embed location per video is documented in the production
+  notes for when that time comes. Scripts 01, 03, and 04 were updated 2026-10-09
+  against Lumerin Node **v7.14.0** (MorpheusUI rebuild in v7.13.0, claim endpoints in
+  v7.11.0, models reload in v7.12.0) and each now has a paste-ready YouTube
+  description. **The scripts are now ahead of the guides:** `desktop-app.mdx` is
+  still `last_verified: v7.3.0`, `provider.mdx` still says to unzip a router `.zip`,
+  and `understanding-session-economics.mdx` doesn't cover early-close refunds. See
+  the "Platform baseline" section of the production notes before editing either
+  side.
+- **Not yet started:** zero-to-earning provider checklist page (sequencing the
+  existing provider content into one path).
 
 ## Validate before assuming anything works
 

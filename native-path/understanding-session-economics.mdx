@@ -34,6 +34,11 @@ at [tech.mor.org/calc.html](https://tech.mor.org/calc.html) rather than treating
 as fixed.
 </Note>
 
+You don't have to work the multiplier out yourself. The desktop app (MorpheusUI) shows
+both numbers on its confirm screen before you open a session: the MOR to be locked,
+and the compute cost. If you use the router API directly,
+`GET /blockchain/models/<MODEL_ID>/session/estimate` returns the same two figures.
+
 ---
 
 ## The Session Lifecycle
@@ -51,29 +56,31 @@ second one and stranding the first session's escrow.
 ### The Flow, Visualized
 
 The confusing part isn't the steps — it's that MOR leaves your wallet on one path and
-comes back on **two different paths of wildly different size**. This is that flow:
+comes back on **two different paths**. This is that flow:
 
 ```mermaid
 flowchart LR
     W["Your Wallet<br/>spendable MOR"]
     O["Open Session<br/>escrows roughly 338x the session cost"]
     A["Active Session<br/>inference is served"]
-    C["Close Session<br/>settles the small used cost"]
-    H["On-Hold Queue<br/>day-locked, not spendable yet"]
+    C["Close Session<br/>splits the stake in two"]
+    H["On-Hold Queue<br/>held until the end of that UTC day"]
     K["Withdraw User Stakes<br/>manual claim"]
 
     W -->|escrow locked| O
     O --> A
     A --> C
-    C -->|small stipend back immediately| W
-    C -->|the rest of the escrow| H
-    H -->|released after hold period| K
+    C -->|unused part back immediately| W
+    C -->|used part| H
+    H -->|released at 00:00 UTC| K
     K -->|claimed MOR| W
 ```
 
-The top return path (**stipend**) is a rounding error next to the bottom one
-(**escrow, via the on-hold queue**) — see the real transaction amounts below to get a
-sense of just how lopsided that split actually is.
+How the stake splits depends on how long the session ran. Close early, and most of it
+takes the top path straight back to your wallet. Let the session run its full length,
+and almost all of it is "used" — the top path carries only a sliver, and the rest goes
+the long way round through the on-hold queue. The real transactions below are
+full-length sessions, which is why the split looks so lopsided.
 
 ---
 
@@ -83,9 +90,10 @@ This is the part that causes real confusion, so it's worth showing the actual nu
 rather than just describing them.
 
 <Warning>
-**Closing a session does not return your full escrow immediately.** Only the small
-*used cost* portion returns right away. The escrow itself requires a separate claim
-step — see below.
+**Closing a session doesn't return all of your stake right away.** Only the
+**unused** part comes back in the close transaction. The part that covered the time
+you used is held until the end of that UTC day, then needs a separate claim — see
+[Claiming Your Stake Back](#claiming-your-stake-back) below.
 </Warning>
 
 ### Real example — three sessions, same wallet
@@ -100,8 +108,10 @@ step — see below.
 ```
 
 Each `Close Session` transaction returned only a fraction of a percent of what was
-escrowed. The rest — roughly **13.7 MOR** across these three sessions — stayed locked
-after closing.
+escrowed. These sessions ran to their end (each close came about a minute after the
+session expired), so almost all of each stake counted as used — what came back is a
+sliver of unused headroom. The rest — roughly **13.7 MOR** across these three
+sessions — stayed locked after closing.
 
 ### Does closing and reopening let you reuse the same escrow? No — verified directly.
 
@@ -116,16 +126,23 @@ your *next* session. It doesn't. Real evidence, a clean close-then-reopen sequen
 ```
 
 If the first session's escrow were reusable, the second open should have drawn on the
-~7.55 MOR just released. It didn't — it escrowed a separate 11.27 MOR. **Each session
-open requires its own fresh capital**, regardless of what's pending from a prior
-session's close.
+~7.55 MOR from the first session. It didn't — that MOR was on hold, so the second open
+escrowed a separate 11.27 MOR. **Each session open requires its own fresh capital**,
+regardless of what's pending from a prior session's close.
 
 ### So where did the rest of the escrow go?
 
-Into an on-hold queue. It becomes claimable — via a call to `withdrawUserStakes` — some
-time later. In observed cases this has ranged from under an hour to several days,
-depending on the state of the on-hold queue. Until claimed, that MOR is **not**
-spendable, including as escrow for a new session.
+Into an on-hold queue. It's released at the end of the UTC day the session ended — the
+contract's rule is `releaseAt = startOfDay(min(closedAt, endsAt)) + 1 day` — so the
+wait is anywhere from minutes (a session that ends just before midnight UTC) to about
+24 hours. After that it sits in the queue until you claim it. Until claimed, that MOR
+is **not** spendable, including as escrow for a new session.
+
+<Note>
+**One exception:** if the close transaction itself lands after `releaseAt` — for
+example, your node was offline when the session expired and closed it the next day —
+everything comes back in the close, with nothing held.
+</Note>
 
 <Tip>
 If you're running multiple sessions or automating session management, budget your
@@ -133,6 +150,53 @@ liquid MOR for the **largest single session's escrow you'll have open at once**,
 enough for the next one — not for your cumulative daily usage. Usage cost is small;
 capital float is the real number that matters.
 </Tip>
+
+### What about closing early?
+
+Closing early doesn't cost you anything. The unused part of the stake — most of it, if
+you close well before the end — comes straight back in the close transaction. Only the
+part that covered the time you actually used goes on hold. The one real trade-off: if
+you then open a new session, it needs its own fresh escrow, because the held part
+isn't spendable until you claim it.
+
+---
+
+## Claiming Your Stake Back
+
+There's no claim button in MorpheusUI yet. Once the hold has passed, you claim from
+your node's API or from the contract directly.
+
+**See where your MOR is first (read-only).** Enter your wallet address at
+[tech.mor.org/session.html](https://tech.mor.org/session.html). It splits your MOR
+into what's in your wallet, what's locked in active sessions, and what's on hold. It
+only shows you — it doesn't claim anything.
+
+**Claim through your node** (router v7.11.0 or newer). Run these from the directory
+that holds your router's `.cookie` file:
+
+```bash
+# Check what's on hold and what's claimable now
+curl -s "http://localhost:8082/blockchain/stakes/onhold" -u "$(cat .cookie)"
+# → {"available": "<claimable now, wei>", "hold": "<still locked, wei>"}
+
+# Claim everything that's available
+curl -s -X POST http://localhost:8082/blockchain/stakes/withdraw \
+  -H 'Content-Type: application/json' \
+  -u "$(cat .cookie)" \
+  -d '{"iterations": 20}'
+# → {"tx": "0x..."}
+```
+
+`iterations` is how many on-hold entries the contract works through in one call — 20
+is plenty for normal use.
+
+**Or call the contract directly.** `withdrawUserStakes` on the Diamond contract
+(`0x6aBE1d282f72B474E54527D93b979A4f64d3030a`) does the same thing, signed by your
+wallet — for example through
+[Basescan's Write tab](https://basescan.org/address/0x6aBE1d282f72B474E54527D93b979A4f64d3030a#writeContract).
+
+Either way, the transaction to look for afterwards is `Withdraw User Stakes` — see
+below.
 
 ---
 
@@ -156,15 +220,17 @@ Look for these method names against the Diamond contract
 | Method | What it means |
 |---|---|
 | `Open Session` | MOR moved from your wallet into escrow |
-| `Close Session` | The small used-cost portion returned to your wallet |
-| `Withdraw User Stakes` | The actual escrow claim — this is what returns the bulk of your MOR |
+| `Close Session` | The unused part of the stake returned to your wallet — only a sliver if the session ran its full length |
+| `Withdraw User Stakes` | The claim — this is what returns the held part, usually the bulk of your MOR |
 
   </Step>
   <Step title="Match amounts and timestamps">
 
 Compare each `Open Session` amount against its corresponding `Close Session` amount.
-If the amount returned is a small fraction of what was escrowed, that's expected —
-the rest is waiting in the on-hold queue for a `Withdraw User Stakes` claim.
+If the session ran its full length and the amount returned is a small fraction of
+what was escrowed, that's expected — the rest is waiting in the on-hold queue for a
+`Withdraw User Stakes` claim. If you closed early, expect a much bigger return at
+close.
 
   </Step>
 </Steps>
@@ -200,14 +266,19 @@ never cost you conversation continuity.
   <Accordion title="Escrow is reusable within the same day">
     **Reality:** it isn't. Verified directly against on-chain transaction history
     across two independent test sessions (see "What Happens When a Session Closes"
-    above). Each session open requires its own fresh escrow — closing a session
-    releases only the small used-cost portion immediately; the escrow principal
-    requires a separate claim before it's spendable again.
+    above). Each session open requires its own fresh escrow — the held part of a
+    closed session's stake isn't spendable again until the hold passes and you claim
+    it.
   </Accordion>
   <Accordion title="Closing a session returns all your money">
-    **Reality:** it returns only the small cost stipend. The bulk of what you staked
-    (the escrow) moves to an on-hold queue and needs a separate `withdrawUserStakes`
-    claim.
+    **Reality:** it returns only the unused part of the stake. The part that covered
+    the time you used moves to an on-hold queue until the end of that UTC day, then
+    needs a separate `withdrawUserStakes` claim.
+  </Accordion>
+  <Accordion title="Closing a session early loses you money">
+    **Reality:** it doesn't. Closing early returns the unused part of the stake
+    immediately — more than you'd get back at close if you let the session run out.
+    The only trade-off is that a new session needs its own fresh escrow.
   </Accordion>
   <Accordion title="Asking the model what model it is confirms what's actually running">
     **Reality:** models frequently misreport their own identity. Trust the API

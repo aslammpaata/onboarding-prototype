@@ -2,13 +2,14 @@
 title: "Morpheus Desktop App — A Beginner's Walkthrough"
 description: "A hands-on, screenshot-driven guide from download to your first AI reply — no crypto experience required."
 audience: ["consumer", "beginner"]
-last_verified: "v7.3.0"
+last_verified: "v7.3.0 hands-on; updated for v7.14.0 (MorpheusUI) from release notes and nodedocs — see notes inline"
 ---
 
 # Morpheus Desktop App — A Beginner's Walkthrough
 
 This guide walks you through the Morpheus Desktop App from a blank computer to your
-first AI reply, one screen at a time.
+first AI reply, one screen at a time. Since v7.13.0 the app installs as
+**MorpheusUI** — same app, new name and a rebuilt interface.
 
 **What you'll do:** Download → Install → Launch → Set up a wallet → Add a little
 funding → Pick a model → Open a session → Chat → Understand what happens next.
@@ -24,8 +25,11 @@ other people's computers around the world, instead of one company's servers.
 
 **What you'll need:**
 
-- Windows 10/11
+- Windows 10/11 (this guide shows Windows; macOS and Linux installers are on the same
+  releases page)
 - An internet connection (skip this entirely with the free offline local model, see Step 4's tip)
+- To use a network model: **at least 5 MOR** (the minimum to open a session) and a
+  little ETH on Base
 - About 10 minutes
 
 ---
@@ -43,8 +47,12 @@ other people's computers around the world, instead of one company's servers.
 
 <Steps>
   <Step title="Download & Install">
-    1. Go to the [Releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
-       and download `win-x64-morpheus-app-<version>.exe`.
+    1. Go to the [Releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases),
+       open the **latest stable release** (skip anything tagged `-test` — those are
+       pre-releases), and download `win-x64-morpheus-app-<version>.exe`.
+
+       On a Mac, use `mac-arm64-morpheus-app-<version>.dmg` (Apple Silicon) or
+       `mac-x64-…dmg` (Intel). On Linux, use the `.AppImage` for your architecture.
 
     2. Run it — Windows may show a SmartScreen warning; **More info → Run anyway**.
 
@@ -52,7 +60,7 @@ other people's computers around the world, instead of one company's servers.
   </Step>
 
   <Step title="First Launch">
-    Open Morpheus from the Start menu.
+    Open **MorpheusUI** from the Start menu.
   </Step>
 
   <Step title="Set Up Your Wallet">
@@ -73,6 +81,12 @@ other people's computers around the world, instead of one company's servers.
        For the full picture on backup methods and spotting scams, see
        [Wallet Setup & Seed Phrase Safety](/native-path/wallet-setup).
 
+    <Tip>
+      **Recovered a wallet and it shows 0 MOR?** One seed phrase can hold several
+      accounts. Use the account switcher in the Wallet tab before assuming anything
+      is wrong — your funds are often on a different account.
+    </Tip>
+
     **Wallet exists, currently empty — expected.**
   </Step>
 
@@ -84,7 +98,8 @@ other people's computers around the world, instead of one company's servers.
 
     1. Wallet tab shows `0 MOR / 0 ETH`.
 
-    2. Send MOR + ETH, or use Receive's QR code.
+    2. Send MOR + ETH, or use Receive's QR code. You need **at least 5 MOR** to open
+       a session, and only a little ETH — fees on Base are tiny.
 
     **Funded.**
 
@@ -100,30 +115,47 @@ other people's computers around the world, instead of one company's servers.
     </Tip>
   </Step>
 
-  <Step title="Choose a Model">
-    Fee and Stake shown here are the model's own listing bond — not what you'll pay to use it.
+  <Step title="Choose a Model and Provider">
+    1. In Chat, click **Change Model**. Search the list by name or tag, or sort it by
+       price per second. Pick any model other than **Local Model**. A model with no
+       live provider right now shows a note instead of a price.
+
+    2. Next you'll see the **providers** offering that model, each with a price and a
+       score. The top-scored provider is selected by default — a sensible choice.
+
+    3. Leave the payment option on **Stake** (the default). **Direct Pay** locks the
+       same amount.
+
+    The Fee and Stake shown in the Models tab are the model's own listing bond — not
+    what you'll pay to use it.
   </Step>
 
   <Step title="Open a Session (Staking, Explained)">
     A **stake** is a refundable deposit, not a payment — like a hotel deposit.
 
-    1. Chat → Change Model → pick one.
+    1. Before you confirm, read the confirm dialog. It shows two numbers, a few
+       hundred times apart:
+       - **MOR to be locked** — your stake. Refundable; locked to guarantee the
+         session, not spent.
+       - **Compute cost** — what the session actually costs.
 
-    2. Open Session → confirm.
+    2. Confirm. The Wallet tab shows available MOR dropped by the stake amount, and
+       Staked Balance up — exactly what the dialog said.
 
-    3. Wallet tab shows available MOR dropped, Staked Balance up.
-
-       <Frame>
+       <Frame caption="Captured on v7.3.0 — current MorpheusUI looks different; the numbers behave the same.">
          <img src="/native-path/images/desktop-app-02-wallet-page-right-after-staking.png" alt="Morpheus Desktop App wallet tab immediately after staking, showing available MOR dropped and Staked Balance increased" />
        </Frame>
 
        <Note>
-         This is expected — your MOR is locked, not spent.
+         This is expected — your MOR is locked, not spent. Clicked Open twice by
+         accident? The app reuses the session that's already open instead of locking
+         your stake a second time.
        </Note>
 
-    4. Session header shows ID, timer, small cost figure.
+    3. The session shows its ID, a countdown timer, and its own small cost figure —
+       separate from the stake.
 
-       <Frame>
+       <Frame caption="Captured on v7.3.0 — current MorpheusUI looks different; the numbers behave the same.">
          <img src="/native-path/images/desktop-app-03-session-header.png" alt="Morpheus Desktop App session header showing session ID, countdown timer, and session cost, distinct from the staked amount" />
        </Frame>
 
@@ -131,19 +163,26 @@ other people's computers around the world, instead of one company's servers.
   </Step>
 
   <Step title="Chat & Run Inference">
+    Type a message and send it. Each answer shows its own token count and cost, so you
+    can see what every reply costs as you go.
+
     **You've used decentralized AI.**
   </Step>
 
   <Step title="What Happens When You're Done">
-    <Warning>
-      **Updated** — this behavior recently changed and is more involved than it used to be.
-    </Warning>
-
-    - **Let the session run out.** When the timer hits zero, your node auto-submits the
-      close transaction after ~1 minute — but this **only settles the session cost**, not
-      your full stake.
-    - **Your stake goes into a hold period (~24 hours)** before it's claimable. This is a
-      recently-enforced network rule, not a bug in your setup.
+    - **Let the session run out.** When the timer hits zero, your node submits the
+      close transaction about a minute later.
+    - **Or close it early.** Click the time icon next to the model line, then the
+      **X** next to the session.
+    - **What comes back at close:** the *unused* part of your stake returns straight
+      away. If the session ran its full length, that's only a sliver; close early and
+      it's most of it.
+    - **The rest is held until the end of that UTC day** — anywhere from minutes to
+      about 24 hours. Then it needs a **claim** before it's back in your spendable
+      balance. This is current network behavior, not a bug in your setup.
+    - **There's no claim button in the app yet.** See
+      [Claiming Your Stake Back](/native-path/understanding-session-economics#claiming-your-stake-back)
+      for how to claim.
 
     For the full picture — verified on-chain examples, why this happens, and how to
     check it yourself — see [Understanding Session Economics](/native-path/understanding-session-economics).
@@ -154,8 +193,11 @@ other people's computers around the world, instead of one company's servers.
 
 ## Understanding the App: A Tour of Each Section
 
-- **Wallet** — balances, address, staking activity.
+- **Wallet** — balances, address, staking activity. Switch between wallets and
+  accounts, and send MOR or ETH.
 - **Chat** — talk to models, manage sessions.
+- **Workspace** — a mode for multi-step tasks, tied to an open session, with a plan
+  view and run timer.
 - **Models** — browse the network's registry.
 - **Agents** — task-oriented AI beyond simple chat.
 - **Provider Hub** — register your own machine to *earn* MOR (a different flow — see
@@ -169,8 +211,10 @@ other people's computers around the world, instead of one company's servers.
 
 | Question | Answer |
 |---|---|
-| My MOR dropped a lot more than the session cost — lost money? | No — see Step 6. Refundable stake, not a payment. |
-| My session ended but I still don't see my full MOR back | Expected right now — see Step 8. There's a ~24h hold, then a manual claim is needed. |
+| My MOR dropped a lot more than the session cost — lost money? | No — see Step 6. Refundable stake, not a payment. The confirm dialog shows both numbers before you open. |
+| My session ended but I still don't see my full MOR back | Expected — see Step 8. The used part is held until the end of that UTC day, then needs a claim ([how to claim](/native-path/understanding-session-economics#claiming-your-stake-back)). |
+| I recovered my wallet and it shows 0 MOR | Check the account switcher in the Wallet tab — your funds are probably on a different account from the same seed phrase. |
+| I clicked Open Session twice | No harm done — the app reuses the session that's already open instead of locking your stake twice. |
 | The Models tab "Stake" doesn't match my session's stake | Different things — model listing bond vs. your session stake. |
 | Copy icon on a model ID does nothing | Known bug — select and copy the text manually instead. |
 
@@ -180,7 +224,8 @@ other people's computers around the world, instead of one company's servers.
 
 - **MOR** — token used to access AI models.
 - **ETH (Base)** — small gas fee token.
-- **Stake** — refundable deposit to open a session — currently subject to a ~24h hold
-  and manual claim before it returns (Step 8).
+- **Stake** — refundable deposit to open a session. The unused part returns at close;
+  the used part is held until the end of that UTC day, then needs a manual claim
+  (Step 8).
 - **Session** — a time-boxed window to chat with a model.
 - **Provider** — someone else's computer serving the model.

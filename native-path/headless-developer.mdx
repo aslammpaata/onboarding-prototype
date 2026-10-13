@@ -2,7 +2,7 @@
 title: "Native Path: Headless / Developer Setup (Raw API)"
 description: "Run a Morpheus proxy-router headless and talk to it with raw curl — for integrating Morpheus into your own tooling."
 audience: ["developer"]
-last_verified: "v7.3.0, tested on Windows PowerShell and WSL2/Linux"
+last_verified: "v7.3.0, tested on Windows PowerShell and WSL2/Linux; download URLs and session-close wording updated for v7.14.0"
 ---
 
 # Native Path: Headless / Developer Setup (Raw API)
@@ -61,14 +61,14 @@ automates for you.
     **WSL2/Linux:**
     ```bash
     mkdir -p ~/morpheus && cd ~/morpheus
-    wget "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases/download/v7.3.0/linux-x86_64-morpheus-router-7.3.0" -O proxy-router
+    wget "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases/download/v7.14.0/linux-x86_64-morpheus-router-7.14.0" -O proxy-router
     chmod +x proxy-router
     ```
 
     **Windows (PowerShell):**
     ```powershell
     mkdir C:\morpheus; cd C:\morpheus
-    Invoke-WebRequest "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases/download/v7.3.0/win-x64-morpheus-router-7.3.0.exe" -OutFile proxy-router.exe
+    Invoke-WebRequest "https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases/download/v7.14.0/win-x64-morpheus-router-7.14.0.exe" -OutFile proxy-router.exe
     ```
 
     <Warning>
@@ -243,11 +243,15 @@ automates for you.
   <Step title="Session Lifecycle — What Happens Next">
     - **Let it expire naturally.** Your node auto-submits the close transaction ~1 minute
       after `endsAt`.
-    - **Closing only returns the small used-cost portion immediately** — the escrow
-      itself requires a separate `withdrawUserStakes` claim. See
+    - **Or close early** — it costs you nothing. The *unused* part of the stake comes
+      straight back in the close transaction.
+    - **The used part is held until the end of that UTC day**, then needs a separate
+      claim (`POST /blockchain/stakes/withdraw` on router v7.11+, or
+      `withdrawUserStakes` on the contract). A session that runs its full length
+      returns only a sliver at close; the rest waits for the claim. See
       [Understanding Session Economics](/native-path/understanding-session-economics)
-      for verified on-chain examples and the full explanation.
-    - **Don't close early** unless you have a reason to.
+      for verified on-chain examples and the
+      [claim commands](/native-path/understanding-session-economics#claiming-your-stake-back).
   </Step>
 </Steps>
 
@@ -261,7 +265,7 @@ automates for you.
 | `401 Unauthorized` | Wrong `.cookie` value — re-read the file, it may have regenerated since you last checked it. |
 | `insufficient MOR balance` on session open | Fund the wallet further, or request a shorter `sessionDuration`. |
 | Second chat message has no memory of the first | You didn't resend history or use a `chat_id` — see Step 6. |
-| Stake didn't come back after closing | Expected right now — see Step 7. Not a bug in your setup. |
+| Stake didn't come back after closing | Expected — only the unused part returns at close; the used part is held until the end of that UTC day, then needs a claim. See Step 7. Not a bug in your setup. |
 
 ---
 
@@ -279,5 +283,5 @@ contexts.
 - **Session** — a time-boxed window during which you can run inference against a model.
 - **`chat_id`** — an optional header that has the router persist and prepend
   conversation history for you, as an alternative to resending it yourself.
-- **Stake hold** — the maturation period between a session closing and its stake
-  becoming claimable; currently requires a manual on-chain call to release.
+- **Stake hold** — the used part of a closed session's stake is held until the end of
+  that UTC day; after that it needs a manual claim to return to your wallet.

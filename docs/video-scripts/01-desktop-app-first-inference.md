@@ -19,10 +19,10 @@ moves, since the app now shows the stake on the confirm screen.
   real/meaningful wallet).
 - Download the **latest stable** installer (`win-x64-morpheus-app-7.14.0.exe` at time
   of writing) — never a `-test` pre-release, even if it's newer.
-- **The written guide lags this script.** `desktop-app.mdx` is still tagged
-  `last_verified: v7.3.0`, from before the v7.13 UI rebuild. Update it first (or at
-  least in the same pass) so the video and the page it embeds on show the same
-  screens.
+- `desktop-app.mdx` was updated to match this script on 2026-10-11, but its two
+  session screenshots are still from v7.3.0 (captioned as such). Capture fresh ones
+  during this shoot — wallet tab right after staking, and the open session — and
+  swap them into the guide, then drop the captions.
 - Confirm these on the live app before shooting, since they come from release notes
   and the official docs rather than a hands-on capture — adjust the narration to
   the real on-screen labels:

@@ -69,11 +69,15 @@ of the ~13 mor.org-ecosystem properties. Progress against the resulting roadmap:
   notes for when that time comes. Scripts 01, 03, and 04 were updated 2026-10-09
   against Lumerin Node **v7.14.0** (MorpheusUI rebuild in v7.13.0, claim endpoints in
   v7.11.0, models reload in v7.12.0) and each now has a paste-ready YouTube
-  description. **The scripts are now ahead of the guides:** `desktop-app.mdx` is
-  still `last_verified: v7.3.0`, `provider.mdx` still says to unzip a router `.zip`,
-  and `understanding-session-economics.mdx` doesn't cover early-close refunds. See
-  the "Platform baseline" section of the production notes before editing either
-  side.
+  description. On 2026-10-11 the guides were brought in line with the scripts:
+  `desktop-app.mdx` (MorpheusUI screens), `provider.mdx` (plain-binary router
+  download, models reload, CORS), `understanding-session-economics.mdx` (early-close
+  refunds, UTC-day hold rule, new "Claiming Your Stake Back" section), plus the same
+  close/claim wording in `headless-developer.mdx`, `morctl.mdx` and
+  `cnode-docker-setup.mdx`. These updates came from release notes and nodedocs, not a
+  hands-on v7.14.0 install; the two session screenshots in `desktop-app.mdx` are
+  still v7.3.0 captures (captioned). See the "Platform baseline" section of the
+  production notes before editing either side.
 - **Not yet started:** zero-to-earning provider checklist page (sequencing the
   existing provider content into one path).
 
@@ -127,9 +131,17 @@ errors before wasting time debugging a broken preview.
   `ls` check in case a future version differs — don't revert to presenting it as
   an open ambiguity.
 - **The stake-lock/claim behavior** (Native path guides) is real, current platform
-  behavior (~24h hold + manual `withdrawUserStakes` call) confirmed via direct
-  testing and cross-referenced against upstream issue #827/PR #832 — not a
-  documentation error to "simplify away."
+  behavior confirmed via direct testing and cross-referenced against upstream issue
+  #827/PR #832 — not a documentation error to "simplify away." The exact rule: on
+  close, the **unused** part of the stake returns in the close transaction; the
+  **used** part is held until the end of that UTC day
+  (`releaseAt = startOfDay(min(closedAt, endsAt)) + 1 day`), then needs a manual
+  claim (`POST /blockchain/stakes/withdraw` on router v7.11+, or `withdrawUserStakes`).
+  A full-length session returns only a sliver at close; a close after `releaseAt`
+  returns everything. There's no claim button in MorpheusUI yet. This framing was
+  aligned to nodedocs (which cites the contract) on 2026-10-11 across every
+  Native-path page — don't revert to "close returns the small used-cost portion" or
+  "don't close early."
 - **`morctl` is the recommended CLI**, not the official `mor-cli` (has confirmed,
   unresolved bugs on Windows — issue #792). Any new content should follow this,
   not reintroduce `mor-cli` as a primary recommendation.

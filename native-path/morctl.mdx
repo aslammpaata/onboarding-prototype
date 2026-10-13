@@ -136,16 +136,13 @@ inference" chain with one call.
   </Step>
 
   <Step title="What Happens When You're Done">
-    <Warning>
-      **Updated** — recently changed, more involved than before.
-    </Warning>
-
-    - Letting a session expire naturally only auto-settles the small session **cost** —
-      not your full stake.
-    - Your stake enters a **~24-hour hold** before it's claimable — a network-wide rule,
-      not specific to `morctl`.
-    - Exiting `--interactive` only stops the local loop — never closes the session early,
-      so no early-close penalty either way.
+    - When a session closes, only the **unused** part of your stake comes straight
+      back. A session that runs its full length returns just a sliver at close.
+    - The used part is **held until the end of that UTC day**, then needs a claim
+      before it's spendable again — a network-wide rule, not specific to `morctl`. See
+      [Claiming Your Stake Back](/native-path/understanding-session-economics#claiming-your-stake-back).
+    - Exiting `--interactive` only stops the local loop — it doesn't close the session,
+      which keeps running until it expires.
 
     See [Understanding Session Economics](/native-path/understanding-session-economics)
     for verified on-chain examples of exactly this behavior.
@@ -177,7 +174,7 @@ inference" chain with one call.
 | `router unreachable` | Confirm the Desktop App or headless router is running. |
 | `insufficient MOR balance` | Fund further, or use `--duration` with a smaller value. |
 | `no bids available` | Wrong/inactive model ID. |
-| Stake missing after session ends | Expected right now — see Step 7. |
+| Stake missing after session ends | Expected — the used part is held until the end of that UTC day, then needs a claim. See Step 7. |
 | Chat history gone after restart | Known limitation — see Step 6. |
 
 ---
@@ -185,6 +182,7 @@ inference" chain with one call.
 ## Glossary
 
 - **Session** — time-boxed access to a model.
-- **Stake** — refundable deposit; currently subject to a ~24h hold + manual claim.
+- **Stake** — refundable deposit. The unused part returns at close; the used part is
+  held until the end of that UTC day, then needs a manual claim.
 - **Preflight** — the no-flags reachability + balance check.
 - **`.cookie` file** — the router's auto-generated auth credential.

@@ -35,11 +35,10 @@ written guide show the same UI state.
 - Use the **latest stable** router from the releases page
   (`linux-x86_64-morpheus-router-7.14.0` at time of writing), never a `-test`
   pre-release.
-- **Reconcile the guide first:** `provider.mdx`'s router step says
-  `unzip linux-x86_64-morpheus-router-*.zip`, but current releases publish the router
-  as a plain binary with no zip. Fix the guide (download → `chmod +x`) before
-  recording so viewers following both don't hit a mismatch. (`headless-developer.mdx`
-  also still pins v7.3.0 download URLs — same cleanup pass.)
+- `provider.mdx` was updated to match this script on 2026-10-11 (plain-binary router
+  download, models reload tip, CORS note), and `headless-developer.mdx`'s download
+  URLs now point at v7.14.0. If a newer stable release exists when you record, bump
+  the version in both guides in the same pass.
 - If you demo `POST /config/models/reload`, confirm the admin user you're calling it
   with has the `system_config` permission; otherwise show a router restart instead.
 - If you open MyProvider (`myprovider.mor.org`) in a browser against your node, it

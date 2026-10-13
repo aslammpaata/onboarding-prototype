@@ -23,18 +23,18 @@ Upstream changes since the scripts were first written, and what they changed:
 the proxy router. Re-check it against OpenClaw/EverClaw releases instead (see
 Accuracy guardrails).
 
-**The written guides lag these scripts in three places.** Fix them before recording
-the matching video, so the video and the page it embeds on agree:
+**The written guides were brought in line with these scripts on 2026-10-11:**
+`desktop-app.mdx` (MorpheusUI screens, 5 MOR minimum, claim pointer),
+`provider.mdx` (plain-binary router download, models reload, CORS note), and
+`understanding-session-economics.mdx` (early-close refunds, the UTC-day hold rule, a
+new "Claiming Your Stake Back" section). `headless-developer.mdx`, `morctl.mdx` and
+`cnode-docker-setup.mdx` were aligned to the same close/claim wording, so no page on
+the site says "don't close early" any more.
 
-- `native-path/desktop-app.mdx` is still `last_verified: v7.3.0`, from before the
-  MorpheusUI rebuild. Its model, session, and wallet steps describe the old screens.
-- `native-path/provider.mdx` says to unzip a router `.zip`, but releases now publish a
-  plain binary. It also doesn't mention `POST /config/models/reload` yet.
-- `native-path/understanding-session-economics.mdx` explains close-time refunds only
-  for sessions that run their full duration. It should also say that an early close
-  returns the unused stake straight away, as nodedocs now does.
-- (Not tied to a video: `native-path/headless-developer.mdx` still pins v7.3.0
-  download URLs.)
+Those guide updates came from release notes and nodedocs, not a hands-on v7.14.0
+install. The two session screenshots in `desktop-app.mdx` are still from v7.3.0
+(captioned as such). Before recording Script 01, capture fresh screenshots on the
+same session and swap them in.
 
 ## Priority order
 

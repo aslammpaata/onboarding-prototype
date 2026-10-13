@@ -31,12 +31,9 @@ session checker. Shoot it in one sitting.
   returns only a sliver. An early close behaves differently (the unused part returns
   in the close transaction itself), and Section 2 says so in one line, but the
   footage should match the guide.
-- **Flag for the guide, not the video:** nodedocs now frames close as "unused stake
-  returns immediately, the used portion is held until the end of the UTC day."
-  `understanding-session-economics.mdx` frames it from the full-duration case
-  ("only the small used-cost portion returns right away"). Both hold up for their
-  case, but the guide should state the early-close behavior explicitly so the video
-  and the page don't seem to disagree. Reconcile that before embedding this video.
+- The guide now matches this script (updated 2026-10-11): unused stake returns at
+  close, the used part is held until the end of that UTC day, then claimed. The
+  diagram you cut to in Section 3 shows that split.
 - Confirm on a current MorpheusUI install that the confirm dialog still shows both
   numbers (stake and compute cost), and that there's still no in-app claim control.
   If a claim button has shipped by the time you record, film it in Section 3
@@ -105,9 +102,9 @@ large escrow amount vs. the tiny returned amount on close.
 
 **[VO]**
 > "These sessions ran their full length. Each Close Session transaction only returns
-> a small fraction of a percent of what was escrowed. That's not a glitch — that's
-> the small stipend settling immediately. The rest doesn't vanish. It moves somewhere
-> else."
+> a small fraction of a percent of what was escrowed. That's not a glitch. What comes
+> back at close is the part of the stake you didn't use — and a session that runs to
+> the end uses almost all of it. The rest doesn't vanish. It moves somewhere else."
 
 **[TEXT OVERLAY]** "Closed early? The unused part of the stake returns in the close
 transaction itself."
@@ -128,8 +125,8 @@ matching the same flow).
 **[VO]**
 > "The rest sits in an on-hold queue — day-locked, not spendable, including as
 > escrow for your next session. It's released at the end of the UTC day the session
-> ended, and then it needs a claim — a separate transaction called Withdraw User
-> Stakes. In practice that's taken anywhere from under an hour to a few days."
+> ended — so anywhere from a few minutes to about a day — and then it needs a claim:
+> a separate transaction called Withdraw User Stakes."
 
 **[SCREEN]** tech.mor.org/session.html with the wallet address entered, showing the
 three buckets: in your wallet, locked in an active session, and on hold.

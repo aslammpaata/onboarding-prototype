@@ -19,20 +19,26 @@ moves, since the app now shows the stake on the confirm screen.
   real/meaningful wallet).
 - Download the **latest stable** installer (`win-x64-morpheus-app-7.14.0.exe` at time
   of writing) — never a `-test` pre-release, even if it's newer.
-- `desktop-app.mdx` was updated to match this script on 2026-10-11, but its two
-  session screenshots are still from v7.3.0 (captioned as such). Capture fresh ones
-  during this shoot — wallet tab right after staking, and the open session — and
-  swap them into the guide, then drop the captions.
-- Confirm these on the live app before shooting, since they come from release notes
-  and the official docs rather than a hands-on capture — adjust the narration to
-  the real on-screen labels:
-  - the provider picker (price and score per provider, top-scored selected by
-    default) and the **Stake / Direct Pay** choice;
-  - the confirm dialog showing **MOR to be locked** next to the **compute cost**;
-  - where per-answer token count and cost appear in chat;
-  - the Wallet tab's account switcher (used in the Recover tip in Section 2);
-  - the early-close control (official docs: the time icon next to the model line,
-    then **X** next to the session).
+- **Confirmed on a live MorpheusUI v7.14.0 install (2026-10-25)**, and
+  `desktop-app.mdx` updated with fresh screenshots to match:
+  - provider picker (price and score) and the Stake / Direct Pay choice — as scripted;
+  - confirm dialog showing MOR to be locked next to compute cost — as scripted;
+  - per-answer token count and cost sit **directly under each reply**
+    (e.g. `5 in · 9 out · <0.0001 MOR`);
+  - the account switcher is the **Account** dropdown at the top of the Wallet tab,
+    next to the address;
+  - **Workspace only becomes available once a session is open**;
+  - the session card at the top of Chat shows session ID, **MOR staked** and a
+    countdown — not a separate cost figure;
+  - **there's no early-close control** in the app. The script now lets the session
+    run out and doesn't tell viewers to close early.
+  - the Wallet tab's **Staking Dashboard** link (`staking.mor.lumerin.io`) is
+    Lumerin's LMR → MOR staking pools, **not** a way to claim session stake — so the
+    "no claim button" lines in Section 5 stand. Don't linger on that link on camera;
+    viewers may assume it's where they claim.
+- **Postponed until the shoot:** a fresh seed-phrase screenshot for `desktop-app.mdx`
+  (still the v7.3.0 one). Capture it on the throwaway wallet you create for Section 2,
+  with the words blurred, and swap it into the guide afterwards.
 
 ---
 
@@ -105,12 +111,13 @@ real generated seed phrase on camera, even a throwaway one.]**
 > put the paper somewhere safe, and never type them into anything ever again."
 
 **[TEXT OVERLAY]** "Recovering an existing wallet and it shows 0 MOR? Check the
-account switcher in the Wallet tab — your funds may be on a different account."
+Account dropdown at the top of the Wallet tab — your funds may be on another account."
 
 **[VO]**
 > "Quick tip if you chose Recover instead: one seed phrase can hold several accounts.
-> If your balance shows zero after recovering, switch accounts in the Wallet tab
-> before you assume anything's wrong — the funds are often just on another one."
+> If your balance shows zero after recovering, open the Account dropdown at the top
+> of the Wallet tab, next to your address, before you assume anything's wrong — the
+> funds are often just on another one."
 
 ---
 
@@ -178,11 +185,20 @@ and compute cost.
 > actually paying."
 
 **[SCREEN]** Confirm. Cut to the Wallet tab — available MOR drops by the stake
-amount, as the dialog said it would.
+amount and Staked Balance shows it, as the dialog said it would.
 
 **[VO]**
 > "Confirm, and the wallet does exactly what that screen told you: available MOR
-> drops by the stake amount. No surprise, no lost money."
+> drops by the stake amount, and it shows up here as your staked balance. No
+> surprise, no lost money."
+
+**[SCREEN]** Back to Chat — the session card at the top: session ID, MOR staked,
+countdown timer. Then the Workspace button lighting up.
+
+**[VO]**
+> "Up top you've now got your session: its ID, the stake you just locked, and how
+> long it has left. Workspace — the mode for multi-step tasks — also unlocks now,
+> because it only works while a session is open."
 
 **[TEXT OVERLAY, small]** "Clicked Open twice? The app reuses the session — it
 won't lock your stake twice."
@@ -198,29 +214,29 @@ won't lock your stake twice."
 > someone you've never met, coordinated entirely by code. That's decentralized AI
 > inference."
 
-**[SCREEN]** Zoom on the answer's token count and cost.
+**[SCREEN]** Zoom on the line under the reply: `5 in · 9 out · <0.0001 MOR`.
 
 **[VO]**
-> "Each answer shows its own token count and cost, so you can see what every reply
-> actually costs as you go."
+> "Right under each answer you get its token count and cost — this one cost less
+> than a ten-thousandth of a MOR. That's the compute cost at work, and you can see
+> how small it is next to the stake."
 
 **[SCREEN]** Let the session timer run out (sped up in editing), then cut to the
 Wallet tab post-close.
 
 **[VO]**
-> "One more thing worth knowing before you go. We let this session run to the end,
-> and when a session runs its full time, the stake doesn't come straight back. It's
-> held until at least the end of that day, UTC — so up to about 24 hours — and then
-> it needs a separate claim to land back in your spendable balance. That's normal,
-> current network behavior — not a bug, and not money lost."
+> "One more thing worth knowing before you go. The app doesn't have a button to end
+> a session early — it runs until the timer hits zero. And because it ran its full
+> time, only a sliver of the stake comes straight back. The rest is held until the
+> end of that day, UTC — so up to about 24 hours — and then it needs a separate
+> claim to land back in your spendable balance. That's normal, current network
+> behavior — not a bug, and not money lost."
 
-**[TEXT OVERLAY]** "Closing early? Unused stake comes back right away. There's no
-claim button in the app yet — the guide shows how to claim."
+**[TEXT OVERLAY]** "No claim button in the app yet — the guide shows how to claim."
 
 **[VO]**
-> "If you close a session early instead, the unused part of the stake comes back
-> right away. And there's no claim button in the app yet — the written guide below
-> shows you exactly how to claim."
+> "There's no claim button in the app yet, so the written guide below shows you
+> exactly how to claim."
 
 **[TEXT OVERLAY]** "Full breakdown, with real on-chain numbers: [link to
 Understanding Session Economics]"

@@ -31,10 +31,27 @@ new "Claiming Your Stake Back" section). `headless-developer.mdx`, `morctl.mdx` 
 `cnode-docker-setup.mdx` were aligned to the same close/claim wording, so no page on
 the site says "don't close early" any more.
 
-Those guide updates came from release notes and nodedocs, not a hands-on v7.14.0
-install. The two session screenshots in `desktop-app.mdx` are still from v7.3.0
-(captioned as such). Before recording Script 01, capture fresh screenshots on the
-same session and swap them in.
+On 2026-10-25 the MorpheusUI side was **confirmed hands-on on v7.14.0**, and
+`desktop-app.mdx` got two fresh screenshots (wallet tab after staking, open session
+with per-answer cost). What that check found, now reflected in the guide and Scripts
+01 and 03:
+
+- per-answer token count and cost sit directly under each reply;
+- the account switcher is the **Account** dropdown at the top of the Wallet tab;
+- Workspace is only available while a session is open;
+- the copy-icon bug on model IDs is fixed;
+- **there's no early-close control in the app** — desktop sessions always run out.
+  Early close is only possible through the router API.
+
+- the Wallet tab's **Staking Dashboard** link (`staking.mor.lumerin.io`) is Lumerin's
+  LMR → MOR staking pools, not a claim option — so "no claim button in the app" holds;
+- the sidebar's **Instructions** page holds custom instructions sent to every model,
+  and **Quick start** is a four-step in-app tour (Wallet, Chat, Workspace, Settings).
+  Both are now in the guide's app tour.
+
+**Postponed until the Script 01 shoot:** a fresh seed-phrase screenshot. The one in
+`desktop-app.mdx` is still from v7.3.0; capture the new one on the throwaway wallet
+created during filming, words blurred.
 
 ## Priority order
 

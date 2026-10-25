@@ -34,10 +34,11 @@ session checker. Shoot it in one sitting.
 - The guide now matches this script (updated 2026-10-11): unused stake returns at
   close, the used part is held until the end of that UTC day, then claimed. The
   diagram you cut to in Section 3 shows that split.
-- Confirm on a current MorpheusUI install that the confirm dialog still shows both
-  numbers (stake and compute cost), and that there's still no in-app claim control.
-  If a claim button has shipped by the time you record, film it in Section 3
-  instead of the API/contract options.
+- Confirmed on MorpheusUI v7.14.0 (2026-10-25): the confirm dialog shows both numbers,
+  there's no early-close control in the app, and the Wallet tab's **Staking
+  Dashboard** link (`staking.mor.lumerin.io`) is Lumerin's LMR → MOR staking pools —
+  it can't claim held session stake. So Section 3's API/contract claim options are
+  the right ones to show.
 
 ---
 
@@ -106,13 +107,15 @@ large escrow amount vs. the tiny returned amount on close.
 > back at close is the part of the stake you didn't use — and a session that runs to
 > the end uses almost all of it. The rest doesn't vanish. It moves somewhere else."
 
-**[TEXT OVERLAY]** "Closed early? The unused part of the stake returns in the close
-transaction itself."
+**[TEXT OVERLAY]** "Closed early through your node's API? The unused part of the
+stake returns in the close transaction itself. (The desktop app has no early-close
+button.)"
 
 **[VO]**
-> "One thing worth knowing: if you close a session early, the unused part of the
-> stake comes back right there in the close transaction. What gets held is the part
-> that covered the time you actually used."
+> "One thing worth knowing: if a session is closed early — which you can do through
+> your node's API, though not from the desktop app — the unused part of the stake
+> comes back right there in the close transaction. What gets held is the part that
+> covered the time you actually used."
 
 ---
 

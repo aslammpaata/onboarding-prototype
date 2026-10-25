@@ -2,7 +2,7 @@
 title: "Morpheus Desktop App — A Beginner's Walkthrough"
 description: "A hands-on, screenshot-driven guide from download to your first AI reply — no crypto experience required."
 audience: ["consumer", "beginner"]
-last_verified: "v7.3.0 hands-on; updated for v7.14.0 (MorpheusUI) from release notes and nodedocs — see notes inline"
+last_verified: "v7.14.0 (MorpheusUI) — screens, labels and the two session screenshots confirmed hands-on 2026-10-25; seed-phrase screenshot still from v7.3.0"
 ---
 
 # Morpheus Desktop App — A Beginner's Walkthrough
@@ -61,6 +61,11 @@ other people's computers around the world, instead of one company's servers.
 
   <Step title="First Launch">
     Open **MorpheusUI** from the Start menu.
+
+    <Tip>
+      Want a quick look around first? **Quick start** in the sidebar walks you through
+      Wallet, Chat, Workspace and Settings in four short steps.
+    </Tip>
   </Step>
 
   <Step title="Set Up Your Wallet">
@@ -83,8 +88,9 @@ other people's computers around the world, instead of one company's servers.
 
     <Tip>
       **Recovered a wallet and it shows 0 MOR?** One seed phrase can hold several
-      accounts. Use the account switcher in the Wallet tab before assuming anything
-      is wrong — your funds are often on a different account.
+      accounts. Use the **Account** dropdown at the top of the Wallet tab, next to
+      your address, before assuming anything is wrong — your funds are often on a
+      different account.
     </Tip>
 
     **Wallet exists, currently empty — expected.**
@@ -140,10 +146,10 @@ other people's computers around the world, instead of one company's servers.
        - **Compute cost** — what the session actually costs.
 
     2. Confirm. The Wallet tab shows available MOR dropped by the stake amount, and
-       Staked Balance up — exactly what the dialog said.
+       **Staked Balance** up by the same amount — exactly what the dialog said.
 
-       <Frame caption="Captured on v7.3.0 — current MorpheusUI looks different; the numbers behave the same.">
-         <img src="/native-path/images/desktop-app-02-wallet-page-right-after-staking.png" alt="Morpheus Desktop App wallet tab immediately after staking, showing available MOR dropped and Staked Balance increased" />
+       <Frame>
+         <img src="/native-path/images/desktop-app-02-wallet-page-right-after-staking.png" alt="MorpheusUI Wallet tab right after opening a session: 11.2552 MOR available, Staked Balance 4.78 MOR, and the Account dropdown next to the wallet address at the top right" />
        </Frame>
 
        <Note>
@@ -152,31 +158,31 @@ other people's computers around the world, instead of one company's servers.
          your stake a second time.
        </Note>
 
-    3. The session shows its ID, a countdown timer, and its own small cost figure —
-       separate from the stake.
-
-       <Frame caption="Captured on v7.3.0 — current MorpheusUI looks different; the numbers behave the same.">
-         <img src="/native-path/images/desktop-app-03-session-header.png" alt="Morpheus Desktop App session header showing session ID, countdown timer, and session cost, distinct from the staked amount" />
-       </Frame>
+    3. Back in Chat, the session card at the top shows the session ID, the MOR staked
+       for it, and a countdown timer. The **Workspace** button next to it only becomes
+       available once a session is open.
 
     **Session open.**
   </Step>
 
   <Step title="Chat & Run Inference">
-    Type a message and send it. Each answer shows its own token count and cost, so you
-    can see what every reply costs as you go.
+    Type a message and send it. Under each answer you'll see its token count and cost
+    — for example `5 in · 9 out · <0.0001 MOR` — so you can see what every reply costs
+    as you go. That's the compute cost at work, and it's tiny next to the stake.
+
+    <Frame>
+      <img src="/native-path/images/desktop-app-03-open-session.png" alt="MorpheusUI Chat with an open session: the session card shows the session ID, 4.78 MOR staked and a countdown timer; below the model's reply is its token count and cost, 5 in, 9 out, under 0.0001 MOR" />
+    </Frame>
 
     **You've used decentralized AI.**
   </Step>
 
   <Step title="What Happens When You're Done">
-    - **Let the session run out.** When the timer hits zero, your node submits the
-      close transaction about a minute later.
-    - **Or close it early.** Click the time icon next to the model line, then the
-      **X** next to the session.
-    - **What comes back at close:** the *unused* part of your stake returns straight
-      away. If the session ran its full length, that's only a sliver; close early and
-      it's most of it.
+    - **The session runs until the timer ends.** About a minute later, your node
+      submits the close transaction. MorpheusUI v7.14.0 doesn't offer a button to end
+      a session early, so plan for it to run its full length.
+    - **What comes back at close:** only the *unused* part of your stake. Because the
+      session ran its full length, that's just a sliver.
     - **The rest is held until the end of that UTC day** — anywhere from minutes to
       about 24 hours. Then it needs a **claim** before it's back in your spendable
       balance. This is current network behavior, not a bug in your setup.
@@ -194,16 +200,24 @@ other people's computers around the world, instead of one company's servers.
 ## Understanding the App: A Tour of Each Section
 
 - **Wallet** — balances, address, staking activity. Switch between wallets and
-  accounts, and send MOR or ETH.
+  accounts, and send MOR or ETH. The **Staking Dashboard** link here opens Lumerin's
+  LMR → MOR staking pools in your browser — a separate product. It can't claim back
+  stake from your sessions.
 - **Chat** — talk to models, manage sessions.
-- **Workspace** — a mode for multi-step tasks, tied to an open session, with a plan
-  view and run timer.
+- **Workspace** — a mode for multi-step tasks with a plan view and run timer.
+  Available only while a session is open.
 - **Models** — browse the network's registry.
 - **Agents** — task-oriented AI beyond simple chat.
 - **Provider Hub** — register your own machine to *earn* MOR (a different flow — see
   the [Provider guide](/native-path/provider)).
+- **Instructions** — custom instructions sent with every Chat message, to every
+  model: a tone, a format, a language, or anything a model should always know about
+  you. Stored on your computer only (up to 4,000 characters); leave it empty to turn
+  it off.
 - **Settings** — preferences, network config.
-- **Help** — docs and support.
+- **Quick start** — a short in-app tour of the main sections (Wallet, Chat,
+  Workspace, Settings). You can skip it at any point.
+- **Help & docs** — docs and support.
 
 ---
 
@@ -213,10 +227,12 @@ other people's computers around the world, instead of one company's servers.
 |---|---|
 | My MOR dropped a lot more than the session cost — lost money? | No — see Step 6. Refundable stake, not a payment. The confirm dialog shows both numbers before you open. |
 | My session ended but I still don't see my full MOR back | Expected — see Step 8. The used part is held until the end of that UTC day, then needs a claim ([how to claim](/native-path/understanding-session-economics#claiming-your-stake-back)). |
-| I recovered my wallet and it shows 0 MOR | Check the account switcher in the Wallet tab — your funds are probably on a different account from the same seed phrase. |
+| I recovered my wallet and it shows 0 MOR | Check the **Account** dropdown at the top of the Wallet tab — your funds are probably on a different account from the same seed phrase. |
 | I clicked Open Session twice | No harm done — the app reuses the session that's already open instead of locking your stake twice. |
+| I can't find a way to end my session early | There isn't one in MorpheusUI v7.14.0 — the session closes on its own when the timer runs out. |
+| Can the Wallet tab's Staking Dashboard claim my held stake? | No — it's Lumerin's LMR → MOR staking pools, a separate product. Claim held session stake as described in [Claiming Your Stake Back](/native-path/understanding-session-economics#claiming-your-stake-back). |
+| Workspace is greyed out or won't open | Open a session first — Workspace only works while a session is active. |
 | The Models tab "Stake" doesn't match my session's stake | Different things — model listing bond vs. your session stake. |
-| Copy icon on a model ID does nothing | Known bug — select and copy the text manually instead. |
 
 ---
 

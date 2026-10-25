@@ -74,10 +74,17 @@ of the ~13 mor.org-ecosystem properties. Progress against the resulting roadmap:
   download, models reload, CORS), `understanding-session-economics.mdx` (early-close
   refunds, UTC-day hold rule, new "Claiming Your Stake Back" section), plus the same
   close/claim wording in `headless-developer.mdx`, `morctl.mdx` and
-  `cnode-docker-setup.mdx`. These updates came from release notes and nodedocs, not a
-  hands-on v7.14.0 install; the two session screenshots in `desktop-app.mdx` are
-  still v7.3.0 captures (captioned). See the "Platform baseline" section of the
-  production notes before editing either side.
+  `cnode-docker-setup.mdx`. On 2026-10-25 the MorpheusUI screens were **confirmed
+  hands-on on v7.14.0** and `desktop-app.mdx` got two fresh screenshots. Key
+  finding: **MorpheusUI has no early-close control** — desktop sessions always run
+  until the timer ends; early close exists only via the router API. Don't
+  reintroduce "click the time icon, then X" (it came from nodedocs and doesn't match
+  the app). The Wallet tab's Staking Dashboard link (`staking.mor.lumerin.io`) was
+  checked: it's Lumerin's LMR → MOR staking pools and **cannot** claim held session
+  stake, so "no claim button in MorpheusUI" stands. The seed-phrase screenshot in
+  `desktop-app.mdx` is still v7.3.0 — deliberately postponed until the Script 01
+  shoot, when a throwaway wallet gets created anyway. See the "Platform baseline"
+  section of the production notes before editing either side.
 - **Not yet started:** zero-to-earning provider checklist page (sequencing the
   existing provider content into one path).
 

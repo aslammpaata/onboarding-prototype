@@ -5,12 +5,14 @@ Registration/Verification)
 **Audience:** developer/technical operator with spare compute, comfortable with a
 terminal
 **Companion page:** `native-path/provider.mdx`
-**Verified against:** Lumerin Node **v7.14.0** (latest stable, released 2026-10-02).
+**Verified against:** Lumerin Node **v7.17.0** (latest stable, released 2026-10-24),
+from release notes only — the provider path hasn't been run hands-on on this version.
 Changes since the guide was written that affect this script: the router ships as a
 plain per-platform binary (`linux-x86_64-morpheus-router-<version>`); v7.12.0 added
 `POST /config/models/reload` so a `models-config.json` change doesn't need a restart;
 v7.13.0 narrowed the admin API's default CORS origins to loopback, Electron, and
-`https://myprovider.mor.org`.
+`https://myprovider.mor.org`; v7.15.0 made the `*_CONTENT` env vars (e.g.
+`MODELS_CONFIG_CONTENT`) overwrite the matching file on every start.
 **Goal:** viewer takes a machine from nothing to a registered, earning provider, and
 knows how to verify they actually got paid — since MyProvider's GUI has no earnings
 dashboard yet, on-chain verification is the only reliable way to check.
@@ -33,12 +35,15 @@ written guide show the same UI state.
 - Decide native Linux vs. Windows+WSL2 topology up front — script below assumes
   native Linux for simplicity; note the WSL2 divergence points inline.
 - Use the **latest stable** router from the releases page
-  (`linux-x86_64-morpheus-router-7.14.0` at time of writing), never a `-test`
+  (`linux-x86_64-morpheus-router-7.17.0` at time of writing), never a `-test`
   pre-release.
 - `provider.mdx` was updated to match this script on 2026-10-11 (plain-binary router
-  download, models reload tip, CORS note), and `headless-developer.mdx`'s download
-  URLs now point at v7.14.0. If a newer stable release exists when you record, bump
-  the version in both guides in the same pass.
+  download, models reload tip, CORS note), and its download URL and
+  `headless-developer.mdx`'s now point at v7.17.0. If a newer stable release exists
+  when you record, bump the version in both guides in the same pass.
+- The guide's flow uses a `models-config.json` file (`MODELS_CONFIG_PATH`). Make sure
+  `MODELS_CONFIG_CONTENT` is **not** set in your environment — since v7.15.0 it
+  overwrites the file on every start, which would silently undo your on-camera edit.
 - If you demo `POST /config/models/reload`, confirm the admin user you're calling it
   with has the `system_config` permission; otherwise show a router restart instead.
 - If you open MyProvider (`myprovider.mor.org`) in a browser against your node, it
@@ -254,7 +259,7 @@ inference. We go from an empty Linux box to a registered, reachable provider, th
 confirm a real payout on-chain. That last step matters: MyProvider doesn't have an
 earnings dashboard yet, so on-chain is how you check.
 
-Recorded against Lumerin Node v7.14.0 on native Linux with Ollama. Windows/WSL2
+Recorded against Lumerin Node v7.17.0 on native Linux with Ollama. Windows/WSL2
 needs an extra port-forwarding step, which the written guide covers.
 
 Chapters

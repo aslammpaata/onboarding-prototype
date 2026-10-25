@@ -3,7 +3,9 @@
 **Target length:** 5–6 minutes
 **Audience:** total beginner, no crypto experience assumed
 **Companion page:** `native-path/desktop-app.mdx`
-**Verified against:** Lumerin Node **v7.14.0** (latest stable, released 2026-10-02).
+**Verified against:** Lumerin Node **v7.17.0** (latest stable, released 2026-10-24) —
+screens confirmed hands-on on v7.14.0 (2026-10-25) and re-checked on v7.17.0
+(2026-10-26), no differences.
 The desktop app's UI was rebuilt in v7.13.0 — it now installs as **MorpheusUI**.
 **Goal:** someone with a blank Windows machine gets from zero to a chat reply, and
 understands *why* their MOR balance moves the way it does — ideally *before* it
@@ -13,13 +15,20 @@ moves, since the app now shows the stake on the confirm screen.
 
 ## Before recording
 
-- Fresh Windows VM or clean user account (no prior Morpheus install).
-- A throwaway wallet ready to fund with **at least 5 MOR** (the minimum to open a
-  session) plus a small amount of Base ETH (see production notes: never a
-  real/meaningful wallet).
-- Download the **latest stable** installer (`win-x64-morpheus-app-7.14.0.exe` at time
+- **A clean app state, so the first-launch screens appear.** Sections 1–2 film the
+  install, the password screen and **Create**, which only show on a fresh install.
+  Your current install already has your old wallet imported, so record on a fresh
+  Windows VM or a separate Windows user account. Don't wipe the existing install's
+  data to get there unless your old wallet's seed phrase is safely backed up — erasing
+  it removes that wallet from the app.
+- **The throwaway wallet is created and funded on camera** (Sections 2–3), with cuts
+  over the waits — see the editing notes in those sections. Have the funds ready to
+  send from somewhere else: **at least 5 MOR** plus a little Base ETH. Never use a
+  real/meaningful wallet as the one being created on camera.
+- Download the **latest stable** installer (`win-x64-morpheus-app-7.17.0.exe` at time
   of writing) — never a `-test` pre-release, even if it's newer.
-- **Confirmed on a live MorpheusUI v7.14.0 install (2026-10-25)**, and
+- **Confirmed on a live MorpheusUI v7.14.0 install (2026-10-25) and re-checked on
+  v7.17.0 (2026-10-26)**, and
   `desktop-app.mdx` updated with fresh screenshots to match:
   - provider picker (price and score) and the Stake / Direct Pay choice — as scripted;
   - confirm dialog showing MOR to be locked next to compute cost — as scripted;
@@ -36,9 +45,8 @@ moves, since the app now shows the stake on the confirm screen.
     Lumerin's LMR → MOR staking pools, **not** a way to claim session stake — so the
     "no claim button" lines in Section 5 stand. Don't linger on that link on camera;
     viewers may assume it's where they claim.
-- **Postponed until the shoot:** a fresh seed-phrase screenshot for `desktop-app.mdx`
-  (still the v7.3.0 one). Capture it on the throwaway wallet you create for Section 2,
-  with the words blurred, and swap it into the guide afterwards.
+- **Capture during the shoot:** a fresh seed-phrase screenshot for `desktop-app.mdx`
+  (still the v7.3.0 one) — see the editing note in Section 2.
 
 ---
 
@@ -104,6 +112,10 @@ Linux: `.AppImage`"
 **[EDITING NOTE: cut to a static graphic or blurred mock screen here — do not show a
 real generated seed phrase on camera, even a throwaway one.]**
 
+**[CAPTURE NOTE: while this screen is up, take a still for the guide (it replaces
+`native-path/images/desktop-app-01-seed-phrase.png`). Blur every word before it
+leaves your machine — the saved file should never contain a readable phrase.]**
+
 **[VO, slower, deliberate pace]**
 > "This is your seed phrase. It is the *only* backup for this wallet — there's no
 > password reset, no support ticket that gets it back for you. Whoever has these
@@ -133,7 +145,12 @@ Account dropdown at the top of the Wallet tab — your funds may be on another a
 **[TEXT OVERLAY]** Simple two-row table: "ETH (Base) → the toll for the road" /
 "MOR → what you're here for"
 
-**[SCREEN]** Show sending funds to the wallet (or the Receive QR code).
+**[SCREEN]** Copy the address (or open Receive's QR code), then start the transfer of
+MOR and Base ETH from the funding wallet.
+
+**[EDITING NOTE: cut from the transfer starting to the Wallet tab showing the funded
+balance — skip the wait for confirmation. A quick "a few moments later" card is
+enough. Don't show the funding wallet's own balance or seed phrase on screen.]**
 
 **[TEXT OVERLAY]** "You need at least 5 MOR to open a session, plus a little Base ETH."
 
@@ -272,7 +289,7 @@ experience needed. We also cover what happens to your MOR when you open a sessio
 it's a refundable stake, not a payment, and the app now shows you both numbers
 before you confirm.
 
-Recorded on MorpheusUI / Lumerin Node v7.14.0. If you're on a newer version, some
+Recorded on MorpheusUI / Lumerin Node v7.17.0. If you're on a newer version, some
 screens may look different. The written guide is kept up to date.
 
 Chapters

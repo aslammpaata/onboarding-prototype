@@ -75,7 +75,12 @@ of the ~13 mor.org-ecosystem properties. Progress against the resulting roadmap:
   refunds, UTC-day hold rule, new "Claiming Your Stake Back" section), plus the same
   close/claim wording in `headless-developer.mdx`, `morctl.mdx` and
   `cnode-docker-setup.mdx`. On 2026-10-25 the MorpheusUI screens were **confirmed
-  hands-on on v7.14.0** and `desktop-app.mdx` got two fresh screenshots. Key
+  hands-on on v7.14.0** and `desktop-app.mdx` got two fresh screenshots; on
+  2026-10-26 they were re-checked on **v7.17.0** (latest stable) with no differences,
+  and all version references (scripts, YouTube descriptions, pinned router download
+  URLs in `provider.mdx`/`headless-developer.mdx`) were bumped to v7.17.0. Script 01
+  is ready to record; it films wallet creation and funding live, so it needs a fresh
+  VM or Windows user account (the existing install holds an imported wallet). Key
   finding: **MorpheusUI has no early-close control** — desktop sessions always run
   until the timer ends; early close exists only via the router API. Don't
   reintroduce "click the time icon, then X" (it came from nodedocs and doesn't match

@@ -4,7 +4,7 @@
 **Audience:** anyone who's opened a session on the Native path and been alarmed by
 their wallet balance
 **Companion page:** `native-path/understanding-session-economics.mdx`
-**Verified against:** Lumerin Node **v7.14.0** (latest stable, released 2026-10-02).
+**Verified against:** Lumerin Node **v7.17.0** (latest stable, released 2026-10-24).
 Two upstream changes shape this script: MorpheusUI's confirm dialog (v7.12/v7.13)
 now shows the stake next to the compute cost *before* you lock anything, and the
 router gained on-hold listing and claim endpoints in v7.11.0
@@ -34,7 +34,8 @@ session checker. Shoot it in one sitting.
 - The guide now matches this script (updated 2026-10-11): unused stake returns at
   close, the used part is held until the end of that UTC day, then claimed. The
   diagram you cut to in Section 3 shows that split.
-- Confirmed on MorpheusUI v7.14.0 (2026-10-25): the confirm dialog shows both numbers,
+- Confirmed on MorpheusUI v7.14.0 (2026-10-25) and re-checked on v7.17.0
+  (2026-10-26): the confirm dialog shows both numbers,
   there's no early-close control in the app, and the Wallet tab's **Staking
   Dashboard** link (`staking.mor.lumerin.io`) is Lumerin's LMR → MOR staking pools —
   it can't claim held session stake. So Section 3's API/contract claim options are
@@ -200,7 +201,7 @@ you expected? You didn't lose it. Opening a session locks a refundable stake tha
 a few hundred times the actual compute cost. This video shows where that MOR goes,
 when you get it back, and how to check every step yourself on-chain.
 
-Recorded against MorpheusUI / Lumerin Node v7.14.0. The desktop app shows the stake
+Recorded against MorpheusUI / Lumerin Node v7.17.0. The desktop app shows the stake
 and the compute cost on the confirm screen before you lock anything. There's no
 in-app claim button yet. Claim through your node's API or the contract (see the
 guide).

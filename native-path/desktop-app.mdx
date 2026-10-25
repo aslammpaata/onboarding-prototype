@@ -2,7 +2,7 @@
 title: "Morpheus Desktop App — A Beginner's Walkthrough"
 description: "A hands-on, screenshot-driven guide from download to your first AI reply — no crypto experience required."
 audience: ["consumer", "beginner"]
-last_verified: "v7.14.0 (MorpheusUI) — screens, labels and the two session screenshots confirmed hands-on 2026-10-25; seed-phrase screenshot still from v7.3.0"
+last_verified: "v7.17.0 (MorpheusUI) — screens and labels confirmed hands-on on v7.14.0 (2026-10-25) and re-checked on v7.17.0 (2026-10-26); seed-phrase screenshot still from v7.3.0"
 ---
 
 # Morpheus Desktop App — A Beginner's Walkthrough
@@ -179,7 +179,7 @@ other people's computers around the world, instead of one company's servers.
 
   <Step title="What Happens When You're Done">
     - **The session runs until the timer ends.** About a minute later, your node
-      submits the close transaction. MorpheusUI v7.14.0 doesn't offer a button to end
+      submits the close transaction. MorpheusUI (v7.17.0) doesn't offer a button to end
       a session early, so plan for it to run its full length.
     - **What comes back at close:** only the *unused* part of your stake. Because the
       session ran its full length, that's just a sliver.
@@ -229,7 +229,7 @@ other people's computers around the world, instead of one company's servers.
 | My session ended but I still don't see my full MOR back | Expected — see Step 8. The used part is held until the end of that UTC day, then needs a claim ([how to claim](/native-path/understanding-session-economics#claiming-your-stake-back)). |
 | I recovered my wallet and it shows 0 MOR | Check the **Account** dropdown at the top of the Wallet tab — your funds are probably on a different account from the same seed phrase. |
 | I clicked Open Session twice | No harm done — the app reuses the session that's already open instead of locking your stake twice. |
-| I can't find a way to end my session early | There isn't one in MorpheusUI v7.14.0 — the session closes on its own when the timer runs out. |
+| I can't find a way to end my session early | There isn't one in MorpheusUI (as of v7.17.0) — the session closes on its own when the timer runs out. |
 | Can the Wallet tab's Staking Dashboard claim my held stake? | No — it's Lumerin's LMR → MOR staking pools, a separate product. Claim held session stake as described in [Claiming Your Stake Back](/native-path/understanding-session-economics#claiming-your-stake-back). |
 | Workspace is greyed out or won't open | Open a session first — Workspace only works while a session is active. |
 | The Models tab "Stake" doesn't match my session's stake | Different things — model listing bond vs. your session stake. |

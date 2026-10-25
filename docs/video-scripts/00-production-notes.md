@@ -4,10 +4,9 @@ Covers all four scripts in this folder. Read this before recording any of them.
 
 ## Platform baseline
 
-Scripts 01, 03, and 04 were last updated on **2026-10-09** against **Lumerin Node
-v7.14.0**, the latest stable release (2026-10-02). Record only on a stable release,
-never a `-test` pre-release, even when the pre-release is newer: as of this update
-`v7.14.43-test` exists, but it's a pre-release.
+Scripts 01, 03, and 04 were last updated on **2026-10-26** against **Lumerin Node
+v7.17.0**, the latest stable release (2026-10-24). Record only on a stable release,
+never a `-test` pre-release, even when the pre-release is newer.
 
 Upstream changes since the scripts were first written, and what they changed:
 
@@ -18,6 +17,9 @@ Upstream changes since the scripts were first written, and what they changed:
 | v7.12 / v7.13.0 | Desktop app rebuilt and renamed **MorpheusUI**. Adds a provider picker (price and score), a confirm dialog showing the stake next to the compute cost, double-click protection on session open, per-answer token count and cost, a multi-wallet switcher, and HD account switching. | 01, 03 |
 | v7.13.0 | New stake formula (`ceil(supply × pricePerSecond × (duration + 1) ÷ todaysBudget)`). Admin API CORS now defaults to loopback, Electron, and `myprovider.mor.org`. | 03, 04 |
 | v7.14.0 | Session and audio security hardening. Nothing visible in these scripts. | none |
+| v7.15.0 | Delegated-user and IPFS permission limits; `*_CONTENT` env vars (e.g. `MODELS_CONFIG_CONTENT`) now overwrite their files on every start. Desktop app unaffected. | 04 (prep note) |
+| v7.16.0 | Model capability fields in the health report; `mor-cli chat` defaults to a 10-minute session (CLI only). | none |
+| v7.17.0 | Router container gets a refreshed CA bundle; installers republished. No UI, wallet, session or staking changes. | none |
 
 **Script 02 (OpenClaw + EverClaw) is unaffected:** the API Gateway path doesn't run
 the proxy router. Re-check it against OpenClaw/EverClaw releases instead (see
@@ -33,7 +35,8 @@ the site says "don't close early" any more.
 
 On 2026-10-25 the MorpheusUI side was **confirmed hands-on on v7.14.0**, and
 `desktop-app.mdx` got two fresh screenshots (wallet tab after staking, open session
-with per-answer cost). What that check found, now reflected in the guide and Scripts
+with per-answer cost). On 2026-10-26 the same checks were **repeated on v7.17.0 with
+no differences**. What those checks found, now reflected in the guide and Scripts
 01 and 03:
 
 - per-answer token count and cost sit directly under each reply;
@@ -42,7 +45,6 @@ with per-answer cost). What that check found, now reflected in the guide and Scr
 - the copy-icon bug on model IDs is fixed;
 - **there's no early-close control in the app** — desktop sessions always run out.
   Early close is only possible through the router API.
-
 - the Wallet tab's **Staking Dashboard** link (`staking.mor.lumerin.io`) is Lumerin's
   LMR → MOR staking pools, not a claim option — so "no claim button in the app" holds;
 - the sidebar's **Instructions** page holds custom instructions sent to every model,
@@ -51,7 +53,10 @@ with per-answer cost). What that check found, now reflected in the guide and Scr
 
 **Postponed until the Script 01 shoot:** a fresh seed-phrase screenshot. The one in
 `desktop-app.mdx` is still from v7.3.0; capture the new one on the throwaway wallet
-created during filming, words blurred.
+created during filming, words blurred. Script 01 films wallet creation and funding
+live (with cuts over the waits), which needs first-launch screens — so record on a
+fresh VM or separate Windows user account, not the install that already holds your
+imported wallet.
 
 ## Priority order
 
@@ -88,7 +93,7 @@ created during filming, words blurred.
   `morpheus-asia.mintlify.site` review URL on screen. Per `CLAUDE.md`, that link is
   shared only directly with staff.
 - **On-screen version:** say or show the version you recorded on (e.g. "MorpheusUI
-  v7.14.0") once, early. When the UI changes again, viewers can tell the video is
+  v7.17.0") once, early. When the UI changes again, viewers can tell the video is
   older than their app instead of assuming they did something wrong.
 
 ## Video descriptions
@@ -157,7 +162,7 @@ more expensive to re-record than a paragraph is to re-edit. Before each recordin
 session, re-check:
 
 - the [releases page](https://github.com/MorpheusAIs/Morpheus-Lumerin-Node/releases)
-  for a stable release newer than v7.14.0. If there is one, skim its notes for
+  for a stable release newer than v7.17.0. If there is one, skim its notes for
   MorpheusUI, session, or stake changes before shooting 01, 03, or 04;
 - the stake hold: held until the end of the UTC day the session ended (up to about
   24 hours), then a manual claim;
